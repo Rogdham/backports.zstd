@@ -1,0 +1,41 @@
+name: build
+
+on:
+  push:
+    branches:
+      - "master"
+      - "ci-*"
+    tags:
+      - "**"
+  pull_request:
+
+env:
+  PY_COLORS: 1
+
+jobs:
+  build_sdist:
+    name: Build sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: python -m pip install -U build
+      - name: Build sdist
+        run: python -m build --sdist
+      - name: List distributions
+        run: ls -lR dist
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist
+      - name: Install sdist
+        run: python -m pip install dist/*.tar.gz
+      - name: Test
+        run: python -m unittest discover tests
