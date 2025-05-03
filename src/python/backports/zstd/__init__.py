@@ -1,3 +1,5 @@
 # FIXME
 
-_FIXME = 42
+from backports.zstd._zstd import ZstdCompressor
+
+__all__ = ("ZstdCompressor",)
