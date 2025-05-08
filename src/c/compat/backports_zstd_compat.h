@@ -13,4 +13,13 @@
 #define Py_END_CRITICAL_SECTION2() }
 #endif
 
+#if PY_VERSION_HEX < 0x030C0000 // Python 3.11 and below
+#include "structmember.h"
+#define Py_T_INT T_INT
+#define Py_T_UINT T_UINT
+#define Py_T_BOOL T_BOOL
+#define Py_T_OBJECT_EX T_OBJECT_EX
+#define Py_READONLY READONLY
+#endif
+
 #endif /* !BACKPORTS_ZSTD_COMPAT_H */
