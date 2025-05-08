@@ -22,4 +22,10 @@
 #define Py_READONLY READONLY
 #endif
 
+#if PY_VERSION_HEX < 0x030B0000 // Python 3.10 and below
+#define _Py_CAST(type, expr) ((type)(expr))
+#define _PyCFunction_CAST(func) _Py_CAST(PyCFunction, _Py_CAST(void (*)(void), (func)))
+PyAPI_FUNC(PyObject *) PyType_GetModuleByDef(PyTypeObject *, PyModuleDef *);
+#endif
+
 #endif /* !BACKPORTS_ZSTD_COMPAT_H */

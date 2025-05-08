@@ -9,7 +9,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ### :rocket: Added
 
-- Support for CPython 3.12
+- Support for CPython 3.10, 3.11 and 3.12
 - Enable zstd multithreading support
 - Build wheels for more architectures
 
