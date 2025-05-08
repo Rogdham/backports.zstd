@@ -2,16 +2,16 @@
 
 # backports.zstd
 
-Backport of [PEP-734 “adding Zstandard to the standard library”][PEP-734]
+Backport of [PEP-784 “adding Zstandard to the standard library”][PEP-784]
 
 [![GitHub build status](https://img.shields.io/github/actions/workflow/status/rogdham/backports.zstd/build.yml?branch=master)](https://github.com/rogdham/backports.zstd/actions?query=branch:master)
 [![Release on PyPI](https://img.shields.io/pypi/v/backports.zstd)](https://pypi.org/project/backports.zstd/)
 
 ---
 
-[📖 PEP-734][PEP-734]&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[📃 Changelog](./CHANGELOG.md)
+[📖 PEP-784][PEP-784]&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[📃 Changelog](./CHANGELOG.md)
 
-[PEP-734]: https://peps.python.org/pep-0784/
+[PEP-784]: https://peps.python.org/pep-0784/
 
 </div>
 
