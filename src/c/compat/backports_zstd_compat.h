@@ -13,4 +13,20 @@
 #define Py_END_CRITICAL_SECTION2() }
 #endif
 
+#if PY_VERSION_HEX < 0x030C0000 // Python 3.11 and below
+typedef struct PyMemberDef
+{
+    const char *name;
+    int type;
+    Py_ssize_t offset;
+    int flags;
+    const char *doc;
+} PyMemberDef;
+#define Py_T_INT 1
+#define Py_T_UINT 11
+#define Py_T_BOOL 14
+#define Py_T_OBJECT_EX 16
+#define Py_READONLY 1
+#endif
+
 #endif /* !BACKPORTS_ZSTD_COMPAT_H */
