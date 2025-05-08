@@ -1,4 +1,16 @@
 #ifndef BACKPORTS_ZSTD_COMPAT_H
 #define BACKPORTS_ZSTD_COMPAT_H
 
+#include "Python.h"
+
+#if PY_VERSION_HEX < 0x030D0000 // Python 3.12 and below
+#define Py_mod_gil 0
+#define Py_MOD_GIL_NOT_USED NULL
+#define PyLong_AsInt _PyLong_AsInt
+#define Py_BEGIN_CRITICAL_SECTION(op) {
+#define Py_END_CRITICAL_SECTION() }
+#define Py_BEGIN_CRITICAL_SECTION2(a, b) {
+#define Py_END_CRITICAL_SECTION2() }
+#endif
+
 #endif /* !BACKPORTS_ZSTD_COMPAT_H */

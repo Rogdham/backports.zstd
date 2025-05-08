@@ -1,6 +1,12 @@
 #ifndef BACKPORTS_ZSTD_REDEF_ORIG_H
 #define BACKPORTS_ZSTD_REDEF_ORIG_H
 
+#if PY_VERSION_HEX < 0x030D0000 // Python 3.12 and below
+
+#include "modsupport.h"
+
+#else
+
 PyAPI_FUNC(void) _PyArg_BadArgument(
     const char *fname,
     const char *displayname,
@@ -31,5 +37,7 @@ PyAPI_FUNC(PyObject *const *) _PyArg_UnpackKeywords(
                                  (minpos), (maxpos), (minkw), (buf)))
 
 PyAPI_FUNC(PyObject *) _PyNumber_Index(PyObject *o);
+
+#endif
 
 #endif /* !BACKPORTS_ZSTD_REDEF_ORIG_H */
