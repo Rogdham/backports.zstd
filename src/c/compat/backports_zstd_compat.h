@@ -29,4 +29,11 @@ typedef struct PyMemberDef
 #define Py_READONLY 1
 #endif
 
+#if PY_VERSION_HEX < 0x030B0000 // Python 3.10 and below
+PyAPI_FUNC(PyObject *) PyType_GetModuleByDef(PyTypeObject *, PyModuleDef *);
+#define _Py_CAST(type, expr) ((type)(expr))
+#define _Py_FUNC_CAST(T, func) _Py_CAST(T, _Py_CAST(void (*)(void), (func)))
+#define _PyCFunction_CAST(func) _Py_FUNC_CAST(PyCFunction, func)
+#endif
+
 #endif /* !BACKPORTS_ZSTD_COMPAT_H */
