@@ -17,6 +17,15 @@ Backport of [PEP-734 “adding Zstandard to the standard library”][PEP-734]
 
 ---
 
+## ⚠️ Work in progress
+
+Not all features nor Python versions are supported at this time.
+
+See the [🎯 Roadmap](https://github.com/Rogdham/backports.zstd/issues/2) for more
+details on the status of this project.
+
+---
+
 ## Install
 
 Add the following dependency to your project:
