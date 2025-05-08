@@ -778,7 +778,7 @@ static int _zstd_exec(PyObject *module) {
 
     /* ZstdError */
     mod_state->ZstdError = PyErr_NewExceptionWithDoc(
-                                  "_zstd.ZstdError",
+                                  "backports.zstd._zstd.ZstdError",
                                   "Call to the underlying zstd library failed.",
                                   NULL, NULL);
     if (mod_state->ZstdError == NULL) {
