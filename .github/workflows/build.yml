@@ -8,6 +8,7 @@ on:
     tags:
       - "**"
   pull_request:
+  workflow_dispatch:
 
 env:
   PY_COLORS: 1
@@ -40,23 +41,66 @@ jobs:
       - name: Test
         run: python -m unittest discover tests
 
+  define_build_wheels_matrix:
+    name: Define build wheels matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.define.outputs.matrix }}
+      full: ${{ steps.define.outputs.full }}
+    env:
+      PYTHON_VERSIONS: cp313
+      FULL:
+        ${{ ( startsWith(github.ref, 'refs/tags') || startsWith(github.head_ref,
+        'release-') || github.event_name == 'workflow_dispatch' ) && '1' || '0' }}
+    steps:
+      - name: Define include matrix
+        id: define
+        shell: python
+        run: |
+          import json
+          import os
+
+          PYTHON_VERSIONS = os.environ["PYTHON_VERSIONS"].split()
+          FULL = os.environ["FULL"] == "1"
+          CASES = []
+
+
+          def add(name, platform, archs, build, qemu=False):
+              CASES.append(locals())
+
+
+          for identifier in ("manylinux", "musllinux"):
+              build = " ".join(f"{py}-{identifier}_*" for py in PYTHON_VERSIONS)
+              add(f"Linux regular {identifier}", "ubuntu-latest", "x86_64 i686", build)
+              if FULL:
+                  for arch in ("aarch64", "ppc64le", "s390x"):
+                      add(f"Linux {arch} {identifier}", "ubuntu-latest", arch, build, True)
+          build = " ".join(f"{py}-*" for py in PYTHON_VERSIONS)
+          add("Windows regular", "windows-latest", "AMD64 x86", build)
+          if FULL:
+              add("Windows arm", "windows-11-arm", "ARM64", build)
+          add("macOS regular", "macos-latest", "x86_64 arm64", build)
+
+          print("full:", FULL)
+          print(json.dumps(CASES, indent=2))
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              if FULL:
+                  f.write("full=1\n")
+              f.write(f"matrix={json.dumps(CASES, indent=None)}\n")
+
   build_wheels:
-    name: Build wheels on ${{ matrix.platform }}
+    name: Build wheels | ${{ matrix.name }}
     runs-on: ${{ matrix.platform }}
     needs:
       - build_sdist
+      - define_build_wheels_matrix
     strategy:
       matrix:
-        platform:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
-        # FIXME: need to add windows arm
-        #        as well as aarch64/ppc64le/s390x
+        include: ${{ fromJSON(needs.define_build_wheels_matrix.outputs.matrix) }}
     env:
-      CIBW_BUILD: cp313-*
+      CIBW_ARCHS: ${{ matrix.archs }}
+      CIBW_BUILD: ${{ matrix.build }}
       CIBW_TEST_COMMAND: python -m unittest discover {project}/tests
-      CIBW_ARCHS_MACOS: "x86_64 arm64"
     steps:
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -69,6 +113,9 @@ jobs:
         with:
           name: sdist
           path: sdist
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        if: ${{ matrix.qemu }}
       - name: Build wheels
         run: python -m cibuildwheel --output-dir dist sdist/*.tar.gz
         shell: bash
@@ -78,16 +125,19 @@ jobs:
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.platform }}
+          name: wheels ${{ matrix.name }}
           path: dist/*.whl
 
   publish:
     name: Publish to PyPI
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags')
+    if:
+      startsWith(github.ref, 'refs/tags') &&
+      needs.define_build_wheels_matrix.outputs.full
     needs:
       - build_sdist
       - build_wheels
+      - define_build_wheels_matrix
     environment: publish
     permissions:
       id-token: write # This permission is mandatory for trusted publishing
@@ -100,7 +150,7 @@ jobs:
       - name: Restore build artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: wheels-*
+          pattern: wheels*
           path: dist
           merge-multiple: true
       - name: List distributions
