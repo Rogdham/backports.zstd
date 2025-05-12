@@ -1,0 +1,34 @@
+name: Generic issue
+description: Report an issue with backports.zstd
+body:
+  - type: textarea
+    attributes:
+      label: Summary
+      description:
+        A clear and concise description of the bug, including a minimal reproducible
+        example.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Platform
+      description: What operating system and architecture are you using? (`uname -orsm`)
+      placeholder: macOS 15 arm64 / Windows 11 x86_64 / Ubuntu 25.04 amd64
+  - type: input
+    attributes:
+      label: Python version
+      description:
+        What flavour and version of Python are you using? (`python --version`)
+      placeholder: CPython 3.13.3 / PyPy 7.3.19 Python 3.11.11
+  - type: input
+    attributes:
+      label: Library version
+      description:
+        What version of `backports.zstd` are you using? (`python -c 'from
+        importlib.metadata import version; print(version("backports.zstd"))'`)
+      placeholder: "0.4.2"
+  - type: input
+    attributes:
+      label: Installation method
+      description: How did you install `backports.zstd`?
+      placeholder: from PyPi / after cloning the GitHub repository
