@@ -24,12 +24,16 @@ __all__ = (
     "ZstdDecompressor",
     "ZstdDict",
     "ZstdError",
+
+    # backports.zstd specifics
+    "patch_tarfile",
 )
 
 import backports.zstd._zstd as _zstd
 import enum
 from backports.zstd._zstd import *
 from backports.zstd._zstdfile import ZstdFile, open, _nbytes
+from backports.zstd._tarfile import patch_tarfile
 
 COMPRESSION_LEVEL_DEFAULT = _zstd._compressionLevel_values[0]
 """The default compression level for Zstandard, currently '3'."""
