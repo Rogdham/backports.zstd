@@ -2,6 +2,7 @@
 
 import os
 import sys
+import unittest
 
 from test.support import swap_attr
 from test.support import os_helper
@@ -155,6 +156,7 @@ class OverwriteTests:
         self.assertTrue(os.path.islink(target))
         self.assertFalse(os.path.exists(target2))
 
+    @unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
     def test_concurrent_extract_dir(self):
         target = os.path.join(self.testdir, 'test')
         def concurrent_mkdir(*args, **kwargs):
@@ -165,6 +167,7 @@ class OverwriteTests:
                 self.extractall(ar)
         self.assertTrue(os.path.isdir(target))
 
+    @unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
     def test_concurrent_extract_implicit_dir(self):
         target = os.path.join(self.testdir, 'test')
         def concurrent_mkdir(*args, **kwargs):
