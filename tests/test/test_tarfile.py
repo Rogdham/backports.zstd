@@ -538,7 +538,8 @@ class CommonReadTest(ReadTest):
         # gh-74468: TarFile.name must name a file, not a parent archive.
         file = self.tar.getmember('ustar/regtype')
         with self.tar.extractfile(file) as fobj:
-            self.assertEqual(fobj.name, 'ustar/regtype')
+            if sys.version_info >= (3, 12):
+                self.assertEqual(fobj.name, 'ustar/regtype')
             self.assertRaises(AttributeError, fobj.fileno)
             if sys.version_info >= (3, 13):
                 self.assertEqual(fobj.mode, 'rb')
@@ -550,7 +551,8 @@ class CommonReadTest(ReadTest):
                 self.assertIs(fobj.seekable(), True)
             self.assertIs(fobj.closed, False)
         self.assertIs(fobj.closed, True)
-        self.assertEqual(fobj.name, 'ustar/regtype')
+        if sys.version_info >= (3, 12):
+            self.assertEqual(fobj.name, 'ustar/regtype')
         self.assertRaises(AttributeError, fobj.fileno)
         if sys.version_info >= (3, 13):
             self.assertEqual(fobj.mode, 'rb')
@@ -771,6 +773,7 @@ class MiscReadTestBase(CommonReadTest):
         finally:
             os_helper.rmtree(DIR)
 
+    @unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
     def test_deprecation_if_no_filter_passed_to_extractall(self):
         DIR = pathlib.Path(TEMPDIR) / "extractall"
         with (
@@ -783,6 +786,7 @@ class MiscReadTestBase(CommonReadTest):
             # check that the stacklevel of the deprecation warning is correct:
             self.assertEqual(cm.filename, __file__)
 
+    @unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
     def test_deprecation_if_no_filter_passed_to_extract(self):
         dirtype = "ustar/dirtype"
         DIR = pathlib.Path(TEMPDIR) / "extractall"
@@ -2729,6 +2733,13 @@ class MiscTest(unittest.TestCase):
             'copyfileobj', 'filemode', 'EmptyHeaderError',
             'TruncatedHeaderError', 'EOFHeaderError', 'InvalidHeaderError',
             'SubsequentHeaderError', 'ExFileObject', 'main'}
+        if sys.version_info < (3, 12):
+            not_exported.update({
+                "fully_trusted_filter", "data_filter",
+                "tar_filter", "FilterError", "AbsoluteLinkError",
+                "OutsideDestinationError", "SpecialFileError", "AbsolutePathError",
+                "LinkOutsideDestinationError",
+            })
         support.check__all__(self, tarfile, not_exported=not_exported,
                              name_of_module=('tarfile', 'backports.zstd._tarfile'))
 
@@ -4122,8 +4133,12 @@ class TestExtractionFilters(unittest.TestCase):
         """Ensure the default filter warns"""
         with ArchiveMaker() as arc:
             arc.add('foo')
-        with warnings_helper.check_warnings(
-                ('Python 3.14', DeprecationWarning)):
+        if sys.version_info >= (3, 12):
+            check_warnings = warnings_helper.check_warnings(
+                ('Python 3.14', DeprecationWarning))
+        else:
+            check_warnings = warnings_helper.check_no_warnings(self)
+        with check_warnings:
             with self.check_context(arc.open(), None):
                 self.expect_file('foo')
 
