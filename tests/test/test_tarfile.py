@@ -437,6 +437,7 @@ class CommonReadTest(ReadTest):
         with open(self.tarname, "rb") as fobj:
             self.assertTrue(tarfile.is_tarfile(io.BytesIO(fobj.read())))
 
+    @unittest.skipIf(sys.version_info < (3, 11), "Requires Python 3.11")
     def test_is_tarfile_keeps_position(self):
         # Test for issue44289: tarfile.is_tarfile() modifies
         # file object's current position
@@ -856,6 +857,7 @@ class MiscReadTestBase(CommonReadTest):
             with self.assertRaises(tarfile.ReadError):
                 tarfile.open(self.tarname)
 
+    @unittest.skipIf(sys.version_info < (3, 11), "Requires Python 3.11")
     def test_next_on_empty_tarfile(self):
         fd = io.BytesIO()
         tf = tarfile.open(fileobj=fd, mode="w")
@@ -3298,9 +3300,10 @@ class NoneInfoExtractTests(ReadTest):
         cls.control_dir = pathlib.Path(TEMPDIR) / "extractall_ctrl"
         tar.errorlevel = 0
         with ExitStack() as cm:
-            if cls.extraction_filter is None:
-                cm.enter_context(warnings.catch_warnings(
-                    action="ignore", category=DeprecationWarning))
+            if sys.version_info >= (3, 11):
+                if cls.extraction_filter is None:
+                    cm.enter_context(warnings.catch_warnings(
+                        action="ignore", category=DeprecationWarning))
             tar.extractall(cls.control_dir, filter=cls.extraction_filter)
         tar.close()
         cls.control_paths = set(
