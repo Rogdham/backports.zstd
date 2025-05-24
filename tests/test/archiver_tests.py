@@ -1,5 +1,6 @@
 """Tests common to tarfile and zipfile."""
 
+from contextlib import nullcontext
 import os
 import sys
 import unittest
@@ -63,7 +64,11 @@ class OverwriteTests:
         target = os.path.join(self.testdir, 'test')
         self.create_file(target, b'content')
         with self.open(self.ar_with_dir) as ar:
-            with self.assertRaises(FileExistsError):
+            if sys.version_info >= (3, 11):
+                cm = self.assertRaises(FileExistsError)
+            else:
+                cm = nullcontext()
+            with cm:
                 self.extractall(ar)
         self.assertTrue(os.path.isfile(target))
         with open(target, 'rb') as f:
@@ -140,7 +145,11 @@ class OverwriteTests:
         target2 = os.path.join(self.testdir, 'test2')
         os.symlink('test2', target, target_is_directory=True)
         with self.open(self.ar_with_dir) as ar:
-            with self.assertRaises(FileExistsError):
+            if sys.version_info >= (3, 11):
+                cm = self.assertRaises(FileExistsError)
+            else:
+                cm = nullcontext()
+            with cm:
                 self.extractall(ar)
         self.assertTrue(os.path.islink(target))
         self.assertFalse(os.path.exists(target2))

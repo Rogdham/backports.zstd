@@ -258,11 +258,13 @@ class UstarReadTest(ReadTest, unittest.TestCase):
     def test_issue14160(self):
         self._test_fileobj_link("symtype2", "ustar/regtype")
 
+    @unittest.skipIf(sys.version_info < (3, 11), "Requires Python 3.11")
     def test_add_dir_getmember(self):
         # bpo-21987
         self.add_dir_and_getmember('bar')
         self.add_dir_and_getmember('a'*101)
 
+    @unittest.skipIf(sys.version_info < (3, 11), "Requires Python 3.11")
     @unittest.skipUnless(hasattr(os, "getuid") and hasattr(os, "getgid"),
                          "Missing getuid or getgid implementation")
     def add_dir_and_getmember(self, name):
@@ -450,6 +452,7 @@ class CommonReadTest(ReadTest):
         with open(self.tarname, "rb") as fobj:
             self.assertTrue(tarfile.is_tarfile(io.BytesIO(fobj.read())))
 
+    @unittest.skipIf(sys.version_info < (3, 11), "Requires Python 3.11")
     def test_is_tarfile_keeps_position(self):
         # Test for issue44289: tarfile.is_tarfile() modifies
         # file object's current position
@@ -895,6 +898,7 @@ class MiscReadTestBase(CommonReadTest):
                 self.assertEqual(m1.offset, m2.offset)
                 self.assertEqual(m1.get_info(), m2.get_info())
 
+    @unittest.skipIf(sys.version_info < (3, 11), "Requires Python 3.11")
     @unittest.skipIf(zlib is None, "requires zlib")
     def test_zlib_error_does_not_leak(self):
         # bpo-39039: tarfile.open allowed zlib exceptions to bubble up when
@@ -1254,6 +1258,7 @@ class LongnameTest:
                                               "iso8859-1", "strict")
             self.assertEqual(tarinfo.type, self.longnametype)
 
+    @unittest.skipIf(sys.version_info < (3, 11), "Requires Python 3.11")
     def test_longname_directory(self):
         # Test reading a longlink directory. Issue #47231.
         longdir = ('a' * 101) + '/'
@@ -1273,7 +1278,8 @@ class GNUReadTest(LongnameTest, ReadTest, unittest.TestCase):
 
     subdir = "gnu"
     longnametype = tarfile.GNUTYPE_LONGNAME
-    format = tarfile.GNU_FORMAT
+    if sys.version_info >= (3, 11):
+        format = tarfile.GNU_FORMAT
 
     # Since 3.2 tarfile is supposed to accurately restore sparse members and
     # produce files with holes. This is what we actually want to test here.
@@ -1336,7 +1342,8 @@ class PaxReadTest(LongnameTest, ReadTest, unittest.TestCase):
 
     subdir = "pax"
     longnametype = tarfile.XHDTYPE
-    format = tarfile.PAX_FORMAT
+    if sys.version_info >= (3, 11):
+        format = tarfile.PAX_FORMAT
 
     def test_pax_global_headers(self):
         tar = tarfile.open(tarname, encoding="iso8859-1")
@@ -2319,6 +2326,7 @@ class PaxWriteTest(GNUWriteTest):
         finally:
             tar.close()
 
+    @unittest.skipIf(sys.version_info < (3, 11), "Requires Python 3.11")
     def test_create_pax_header(self):
         # The ustar header should contain values that can be
         # represented reasonably, even if a better (e.g. higher
@@ -3389,9 +3397,10 @@ class NoneInfoExtractTests(ReadTest):
         cls.control_dir = pathlib.Path(TEMPDIR) / "extractall_ctrl"
         tar.errorlevel = 0
         with ExitStack() as cm:
-            if cls.extraction_filter is None:
-                cm.enter_context(warnings.catch_warnings(
-                    action="ignore", category=DeprecationWarning))
+            if sys.version_info >= (3, 11):
+                if cls.extraction_filter is None:
+                    cm.enter_context(warnings.catch_warnings(
+                        action="ignore", category=DeprecationWarning))
             tar.extractall(cls.control_dir, filter=cls.extraction_filter)
         tar.close()
         cls.control_paths = set(
