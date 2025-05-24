@@ -1,3 +1,4 @@
+import sys
 import tarfile
 from tarfile import RECORDSIZE, CompressionError, ReadError, _LowLevelFile
 from functools import wraps
@@ -41,7 +42,10 @@ class _Stream(tarfile._Stream):
                     self.exception = zlib.error
                     self._init_read_gz()
                 else:
-                    self._init_write_gz(compresslevel)
+                    if sys.version_info >= (3, 12):
+                        self._init_write_gz(compresslevel)
+                    else:
+                        self._init_write_gz()
 
             elif comptype == "bz2":
                 try:

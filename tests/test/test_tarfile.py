@@ -136,7 +136,10 @@ class UstarReadTest(ReadTest, unittest.TestCase):
                     "regular file extraction failed")
 
     def test_fileobj_readlines(self):
-        self.tar.extract("ustar/regtype", TEMPDIR, filter='data')
+        if sys.version_info >= (3, 12):
+            self.tar.extract("ustar/regtype", TEMPDIR, filter='data')
+        else:
+            self.tar.extract("ustar/regtype", TEMPDIR)
         tarinfo = self.tar.getmember("ustar/regtype")
         with open(os.path.join(TEMPDIR, "ustar/regtype"), "r") as fobj1:
             lines1 = fobj1.readlines()
@@ -154,7 +157,10 @@ class UstarReadTest(ReadTest, unittest.TestCase):
                     "fileobj.readlines() failed")
 
     def test_fileobj_iter(self):
-        self.tar.extract("ustar/regtype", TEMPDIR, filter='data')
+        if sys.version_info >= (3, 12):
+            self.tar.extract("ustar/regtype", TEMPDIR, filter='data')
+        else:
+            self.tar.extract("ustar/regtype", TEMPDIR)
         tarinfo = self.tar.getmember("ustar/regtype")
         with open(os.path.join(TEMPDIR, "ustar/regtype"), "r") as fobj1:
             lines1 = fobj1.readlines()
@@ -164,8 +170,11 @@ class UstarReadTest(ReadTest, unittest.TestCase):
                     "fileobj.__iter__() failed")
 
     def test_fileobj_seek(self):
-        self.tar.extract("ustar/regtype", TEMPDIR,
-                         filter='data')
+        if sys.version_info >= (3, 12):
+            self.tar.extract("ustar/regtype", TEMPDIR,
+                            filter='data')
+        else:
+            self.tar.extract("ustar/regtype", TEMPDIR)
         with open(os.path.join(TEMPDIR, "ustar/regtype"), "rb") as fobj:
             data = fobj.read()
 
@@ -257,16 +266,19 @@ class UstarReadTest(ReadTest, unittest.TestCase):
     @unittest.skipUnless(hasattr(os, "getuid") and hasattr(os, "getgid"),
                          "Missing getuid or getgid implementation")
     def add_dir_and_getmember(self, name):
-        def filter(tarinfo):
-            tarinfo.uid = tarinfo.gid = 100
-            return tarinfo
-
+        if sys.version_info >= (3, 12):
+            def filter(tarinfo):
+                tarinfo.uid = tarinfo.gid = 100
+                return tarinfo
         with os_helper.temp_cwd():
             with tarfile.open(tmpname, 'w') as tar:
                 tar.format = tarfile.USTAR_FORMAT
                 try:
                     os.mkdir(name)
-                    tar.add(name, filter=filter)
+                    if sys.version_info >= (3, 12):
+                        tar.add(name, filter=filter)
+                    else:
+                        tar.add(name)
                 finally:
                     os.rmdir(name)
             with tarfile.open(tmpname) as tar:
@@ -523,7 +535,10 @@ class CommonReadTest(ReadTest):
                 t = tar.next()
 
                 with self.assertRaisesRegex(tarfile.ReadError, "unexpected end of data"):
-                    tar.extract(t, TEMPDIR, filter='data')
+                    if sys.version_info >= (3, 12):
+                        tar.extract(t, TEMPDIR, filter='data')
+                    else:
+                        tar.extract(t, TEMPDIR)
 
                 with self.assertRaisesRegex(tarfile.ReadError, "unexpected end of data"):
                     tar.extractfile(t).read()
@@ -535,6 +550,7 @@ class CommonReadTest(ReadTest):
             with tarfile.open(support.findfile('recursion.tar', subdir='archivetestdata')):
                 pass
 
+    @unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
     @unittest.skipIf(sys.version_info >= (3, 13), "Requires Python <3.13")
     def test_extractfile_name(self):
         # gh-74468: TarFile.name must name a file, not a parent archive.
@@ -547,7 +563,8 @@ class CommonReadTest(ReadTest):
         # gh-74468: TarFile.name must name a file, not a parent archive.
         file = self.tar.getmember('ustar/regtype')
         with self.tar.extractfile(file) as fobj:
-            self.assertEqual(fobj.name, 'ustar/regtype')
+            if sys.version_info >= (3, 12):
+                self.assertEqual(fobj.name, 'ustar/regtype')
             self.assertRaises(AttributeError, fobj.fileno)
             if sys.version_info >= (3, 13):
                 self.assertEqual(fobj.mode, 'rb')
@@ -559,7 +576,8 @@ class CommonReadTest(ReadTest):
                 self.assertIs(fobj.seekable(), True)
             self.assertIs(fobj.closed, False)
         self.assertIs(fobj.closed, True)
-        self.assertEqual(fobj.name, 'ustar/regtype')
+        if sys.version_info >= (3, 12):
+            self.assertEqual(fobj.name, 'ustar/regtype')
         self.assertRaises(AttributeError, fobj.fileno)
         if sys.version_info >= (3, 13):
             self.assertEqual(fobj.mode, 'rb')
@@ -719,16 +737,25 @@ class MiscReadTestBase(CommonReadTest):
     def test_extract_hardlink(self):
         # Test hardlink extraction (e.g. bug #857297).
         with tarfile.open(tarname, errorlevel=1, encoding="iso8859-1") as tar:
-            tar.extract("ustar/regtype", TEMPDIR, filter='data')
+            if sys.version_info >= (3, 12):
+                tar.extract("ustar/regtype", TEMPDIR, filter='data')
+            else:
+                tar.extract("ustar/regtype", TEMPDIR)
             self.addCleanup(os_helper.unlink, os.path.join(TEMPDIR, "ustar/regtype"))
 
-            tar.extract("ustar/lnktype", TEMPDIR, filter='data')
+            if sys.version_info >= (3, 12):
+                tar.extract("ustar/lnktype", TEMPDIR, filter='data')
+            else:
+                tar.extract("ustar/lnktype", TEMPDIR)
             self.addCleanup(os_helper.unlink, os.path.join(TEMPDIR, "ustar/lnktype"))
             with open(os.path.join(TEMPDIR, "ustar/lnktype"), "rb") as f:
                 data = f.read()
             self.assertEqual(sha256sum(data), sha256_regtype)
 
-            tar.extract("ustar/symtype", TEMPDIR, filter='data')
+            if sys.version_info >= (3, 12):
+                tar.extract("ustar/symtype", TEMPDIR, filter='data')
+            else:
+                tar.extract("ustar/symtype", TEMPDIR)
             self.addCleanup(os_helper.unlink, os.path.join(TEMPDIR, "ustar/symtype"))
             with open(os.path.join(TEMPDIR, "ustar/symtype"), "rb") as f:
                 data = f.read()
@@ -743,7 +770,10 @@ class MiscReadTestBase(CommonReadTest):
         os.mkdir(DIR)
         try:
             directories = [t for t in tar if t.isdir()]
-            tar.extractall(DIR, directories, filter='fully_trusted')
+            if sys.version_info >= (3, 12):
+                tar.extractall(DIR, directories, filter='fully_trusted')
+            else:
+                tar.extractall(DIR, directories)
             for tarinfo in directories:
                 path = os.path.join(DIR, tarinfo.name)
                 if sys.platform != "win32":
@@ -774,7 +804,10 @@ class MiscReadTestBase(CommonReadTest):
         try:
             with tarfile.open(tarname, encoding="iso8859-1") as tar:
                 tarinfo = tar.getmember(dirtype)
-                tar.extract(tarinfo, path=DIR, filter='fully_trusted')
+                if sys.version_info >= (3, 12):
+                    tar.extract(tarinfo, path=DIR, filter='fully_trusted')
+                else:
+                    tar.extract(tarinfo, path=DIR)
                 extracted = os.path.join(DIR, dirtype)
                 self.assertEqual(os.path.getmtime(extracted), tarinfo.mtime)
                 if sys.platform != "win32":
@@ -814,7 +847,10 @@ class MiscReadTestBase(CommonReadTest):
         with os_helper.temp_dir(DIR), \
              tarfile.open(tarname, encoding="iso8859-1") as tar:
             directories = [t for t in tar if t.isdir()]
-            tar.extractall(os_helper.FakePath(DIR), directories, filter='fully_trusted')
+            if sys.version_info >= (3, 12):
+                tar.extractall(os_helper.FakePath(DIR), directories, filter='fully_trusted')
+            else:
+                tar.extractall(DIR, directories)
             for tarinfo in directories:
                 path = os.path.join(DIR, tarinfo.name)
                 self.assertEqual(os.path.getmtime(path), tarinfo.mtime)
@@ -825,7 +861,10 @@ class MiscReadTestBase(CommonReadTest):
         with os_helper.temp_dir(DIR), \
              tarfile.open(tarname, encoding="iso8859-1") as tar:
             tarinfo = tar.getmember(dirtype)
-            tar.extract(tarinfo, path=os_helper.FakePath(DIR), filter='fully_trusted')
+            if sys.version_info >= (3, 12):
+                tar.extract(tarinfo, path=os_helper.FakePath(DIR), filter='fully_trusted')
+            else:
+                tar.extract(tarinfo, path=DIR)
             extracted = os.path.join(DIR, dirtype)
             self.assertEqual(os.path.getmtime(extracted), tarinfo.mtime)
 
@@ -865,6 +904,7 @@ class MiscReadTestBase(CommonReadTest):
             with self.assertRaises(tarfile.ReadError):
                 tarfile.open(self.tarname)
 
+    @unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
     def test_next_on_empty_tarfile(self):
         fd = io.BytesIO()
         tf = tarfile.open(fileobj=fd, mode="w")
@@ -970,6 +1010,7 @@ class LzmaStreamReadTest(LzmaTest, StreamReadTest):
 class ZstdStreamReadTest(ZstdTest, StreamReadTest):
     pass
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class TarStreamModeReadTest(StreamModeTest, unittest.TestCase):
 
     def test_stream_mode_no_cache(self):
@@ -977,15 +1018,19 @@ class TarStreamModeReadTest(StreamModeTest, unittest.TestCase):
             pass
         self.assertEqual(self.tar.members, [])
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class GzipStreamModeReadTest(GzipTest, TarStreamModeReadTest):
     pass
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class Bz2StreamModeReadTest(Bz2Test, TarStreamModeReadTest):
     pass
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class LzmaStreamModeReadTest(LzmaTest, TarStreamModeReadTest):
     pass
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class ZstdStreamModeReadTest(ZstdTest, TarStreamModeReadTest):
     pass
 
@@ -1053,6 +1098,7 @@ class LzmaDetectReadTest(LzmaTest, DetectReadTest):
 class ZstdDetectReadTest(ZstdTest, DetectReadTest):
     pass
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class GzipBrokenHeaderCorrectException(GzipTest, unittest.TestCase):
     """
     See: https://github.com/python/cpython/issues/107396
@@ -1237,7 +1283,10 @@ class GNUReadTest(LongnameTest, ReadTest, unittest.TestCase):
     # an all platforms, and after that a test that will work only on
     # platforms/filesystems that prove to support sparse files.
     def _test_sparse_file(self, name):
-        self.tar.extract(name, TEMPDIR, filter='data')
+        if sys.version_info >= (3, 12):
+            self.tar.extract(name, TEMPDIR, filter='data')
+        else:
+            self.tar.extract(name, TEMPDIR)
         filename = os.path.join(TEMPDIR, name)
         with open(filename, "rb") as fobj:
             data = fobj.read()
@@ -1647,8 +1696,11 @@ class WriteTest(WriteTestBase, unittest.TestCase):
             with tarfile.open(temparchive, errorlevel=2) as tar:
                 # this should not raise OSError: [Errno 17] File exists
                 try:
-                    tar.extractall(path=tempdir,
-                                   filter='fully_trusted')
+                    if sys.version_info >= (3, 12):
+                        tar.extractall(path=tempdir,
+                                    filter='fully_trusted')
+                    else:
+                        tar.extractall(path=tempdir)
                 except OSError:
                     self.fail("extractall failed with symlinked files")
         finally:
@@ -1804,6 +1856,7 @@ class LzmaStreamWriteTest(LzmaTest, StreamWriteTest):
 class ZstdStreamWriteTest(ZstdTest, StreamWriteTest):
     decompressor = zstd.ZstdDecompressor if zstd else None
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class _CompressedWriteTest(TarTest):
     # This is not actually a standalone test.
     # It does not inherit WriteTest because it only makes sense with gz,bz2
@@ -1826,6 +1879,7 @@ class _CompressedWriteTest(TarTest):
         fobj = self._compressed_tar(compresslevel)
         self.assertEqual(fobj.getvalue()[:3], b"\x1f\x8b\x08")
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class Bz2CompressWriteTest(Bz2Test, _CompressedWriteTest, unittest.TestCase):
     prefix = "w:"
     def test_compression_levels(self):
@@ -1833,6 +1887,7 @@ class Bz2CompressWriteTest(Bz2Test, _CompressedWriteTest, unittest.TestCase):
         self._test_bz2_header(5)
         self._test_bz2_header(9)
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class Bz2CompressStreamWriteTest(Bz2Test, _CompressedWriteTest,
         unittest.TestCase):
     prefix = "w|"
@@ -1841,6 +1896,7 @@ class Bz2CompressStreamWriteTest(Bz2Test, _CompressedWriteTest,
         self._test_bz2_header(5)
         self._test_bz2_header(9)
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class GzCompressWriteTest(GzipTest,  _CompressedWriteTest, unittest.TestCase):
     prefix = "w:"
     def test_compression_levels(self):
@@ -1848,6 +1904,7 @@ class GzCompressWriteTest(GzipTest,  _CompressedWriteTest, unittest.TestCase):
         self._test_gz_header(5)
         self._test_gz_header(9)
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class GzCompressStreamWriteTest(GzipTest, _CompressedWriteTest,
         unittest.TestCase):
     prefix = "w|"
@@ -1856,6 +1913,7 @@ class GzCompressStreamWriteTest(GzipTest, _CompressedWriteTest,
         self._test_gz_header(5)
         self._test_gz_header(9)
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class CompressLevelRaises(unittest.TestCase):
     def test_compresslevel_wrong_modes(self):
         compresslevel = 5
@@ -2748,6 +2806,13 @@ class MiscTest(unittest.TestCase):
             'copyfileobj', 'filemode', 'EmptyHeaderError',
             'TruncatedHeaderError', 'EOFHeaderError', 'InvalidHeaderError',
             'SubsequentHeaderError', 'ExFileObject', 'main'}
+        if sys.version_info < (3, 12):
+            not_exported.update({
+                "fully_trusted_filter", "data_filter",
+                "tar_filter", "FilterError", "AbsoluteLinkError",
+                "OutsideDestinationError", "SpecialFileError", "AbsolutePathError",
+                "LinkOutsideDestinationError",
+            })
         support.check__all__(self, tarfile, not_exported=not_exported,
                              name_of_module=('tarfile', 'backports.zstd._tarfile'))
 
@@ -2785,6 +2850,7 @@ class CommandLineTest(unittest.TestCase):
             for tardata in files:
                 tf.add(tardata, arcname=os.path.basename(tardata))
 
+    @unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
     def make_evil_tarfile(self, tar_name):
         self.addCleanup(os_helper.unlink, tar_name)
         with tarfile.open(tar_name, 'w') as tf:
@@ -2955,6 +3021,7 @@ class CommandLineTest(unittest.TestCase):
             finally:
                 os_helper.rmtree(tarextdir)
 
+    @unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
     def test_extract_command_filter(self):
         self.make_evil_tarfile(tmpname)
         # Make an inner directory, so the member named '../evil'
@@ -3057,7 +3124,10 @@ class LinkEmulationTest(ReadTest, unittest.TestCase):
     # symbolic or hard links tarfile tries to extract these types of members
     # as the regular files they point to.
     def _test_link_extraction(self, name):
-        self.tar.extract(name, TEMPDIR, filter='fully_trusted')
+        if sys.version_info >= (3, 12):
+            self.tar.extract(name, TEMPDIR, filter='fully_trusted')
+        else:
+            self.tar.extract(name, TEMPDIR)
         with open(os.path.join(TEMPDIR, name), "rb") as f:
             data = f.read()
         self.assertEqual(sha256sum(data), sha256_regtype)
@@ -3189,10 +3259,14 @@ class NumericOwnerTest(unittest.TestCase):
                                         mock_chown):
         with self._setup_test(mock_geteuid) as (tarfl, filename_1, _,
                                                 filename_2):
-            tarfl.extract(filename_1, TEMPDIR, numeric_owner=True,
-                          filter='fully_trusted')
-            tarfl.extract(filename_2 , TEMPDIR, numeric_owner=True,
-                          filter='fully_trusted')
+            if sys.version_info >= (3, 12):
+                tarfl.extract(filename_1, TEMPDIR, numeric_owner=True,
+                            filter='fully_trusted')
+                tarfl.extract(filename_2 , TEMPDIR, numeric_owner=True,
+                            filter='fully_trusted')
+            else:
+                tarfl.extract(filename_1, TEMPDIR, numeric_owner=True)
+                tarfl.extract(filename_2 , TEMPDIR, numeric_owner=True)
 
         # convert to filesystem paths
         f_filename_1 = os.path.join(TEMPDIR, filename_1)
@@ -3210,8 +3284,11 @@ class NumericOwnerTest(unittest.TestCase):
                                            mock_chown):
         with self._setup_test(mock_geteuid) as (tarfl, filename_1, dirname_1,
                                                 filename_2):
-            tarfl.extractall(TEMPDIR, numeric_owner=True,
-                             filter='fully_trusted')
+            if sys.version_info >= (3, 12):
+                tarfl.extractall(TEMPDIR, numeric_owner=True,
+                                filter='fully_trusted')
+            else:
+                tarfl.extractall(TEMPDIR, numeric_owner=True)
 
         # convert to filesystem paths
         f_filename_1 = os.path.join(TEMPDIR, filename_1)
@@ -3236,8 +3313,11 @@ class NumericOwnerTest(unittest.TestCase):
     def test_extract_without_numeric_owner(self, mock_geteuid, mock_chmod,
                                            mock_chown):
         with self._setup_test(mock_geteuid) as (tarfl, filename_1, _, _):
-            tarfl.extract(filename_1, TEMPDIR, numeric_owner=False,
-                          filter='fully_trusted')
+            if sys.version_info >= (3, 12):
+                tarfl.extract(filename_1, TEMPDIR, numeric_owner=False,
+                            filter='fully_trusted')
+            else:
+                tarfl.extract(filename_1, TEMPDIR, numeric_owner=False)
 
         # convert to filesystem paths
         f_filename_1 = os.path.join(TEMPDIR, filename_1)
@@ -3251,6 +3331,7 @@ class NumericOwnerTest(unittest.TestCase):
                               tarfl.extract, filename_1, TEMPDIR, False, True)
 
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class ReplaceTests(ReadTest, unittest.TestCase):
     def test_replace_name(self):
         member = self.tar.getmember('ustar/regtype')
@@ -3291,6 +3372,7 @@ class ReplaceTests(ReadTest, unittest.TestCase):
             member.replace(offset=123456789)
 
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 @unittest.skipIf(sys.version_info < (3, 13) and platform.architecture()[0] != "64bit", "gh-107811")
 class NoneInfoExtractTests(ReadTest):
     # These mainly check that all kinds of members are extracted successfully
@@ -3390,20 +3472,25 @@ class NoneInfoExtractTests(ReadTest):
         with self.extract_with_none('uid', 'gid', 'uname', 'gname'):
             pass
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class NoneInfoExtractTests_Data(NoneInfoExtractTests, unittest.TestCase):
     extraction_filter = 'data'
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class NoneInfoExtractTests_FullyTrusted(NoneInfoExtractTests,
                                         unittest.TestCase):
     extraction_filter = 'fully_trusted'
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class NoneInfoExtractTests_Tar(NoneInfoExtractTests, unittest.TestCase):
     extraction_filter = 'tar'
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class NoneInfoExtractTests_Default(NoneInfoExtractTests,
                                    unittest.TestCase):
     extraction_filter = None
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class NoneInfoTests_Misc(unittest.TestCase):
     def test_add(self):
         # When addfile() encounters None metadata, it raises a ValueError
@@ -3534,6 +3621,7 @@ def _filemode_to_int(mode):
 
     return result
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class ArchiveMaker:
     """Helper to create a tar file with specific contents
 
@@ -3600,6 +3688,7 @@ else:
         return f
 
 
+@unittest.skipIf(sys.version_info < (3, 12), "Requires Python 3.12")
 class TestExtractionFilters(unittest.TestCase):
 
     # A temporary directory for the extraction results.
@@ -4171,8 +4260,12 @@ class TestExtractionFilters(unittest.TestCase):
         """Ensure the default filter warns"""
         with ArchiveMaker() as arc:
             arc.add('foo')
-        with warnings_helper.check_warnings(
-                ('Python 3.14', DeprecationWarning)):
+        if sys.version_info >= (3, 12):
+            check_warnings = warnings_helper.check_warnings(
+                ('Python 3.14', DeprecationWarning))
+        else:
+            check_warnings = warnings_helper.check_no_warnings(self)
+        with check_warnings:
             with self.check_context(arc.open(), None):
                 self.expect_file('foo')
 
