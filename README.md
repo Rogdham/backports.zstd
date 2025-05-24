@@ -43,6 +43,12 @@ import sys
 
 if sys.version_info < (3, 14):
     from backports import zstd
+
+    # optional: patch modules that use zstd internally
+    zstd.patch_tarfile()
 else:
     from compression import zstd
 ```
+
+Note that depending on how you import modules needing Zstandard support (e.g.
+`tarfile`), you will need to call the patch function **before** the import.
