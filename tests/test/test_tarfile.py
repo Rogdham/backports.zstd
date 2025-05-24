@@ -6,13 +6,14 @@ import sys
 import os
 import io
 from hashlib import sha256
-from contextlib import contextmanager, ExitStack
+from contextlib import contextmanager, ExitStack, nullcontext
 from random import Random
 import pathlib
 import shutil
 import re
 import warnings
 import stat
+import platform
 
 import unittest
 import unittest.mock
@@ -112,6 +113,8 @@ class ReadTest(TarTest):
     def tearDown(self):
         self.tar.close()
 
+
+@unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
 class StreamModeTest(ReadTest):
 
     # Only needs to change how the tarfile is opened to set
@@ -332,27 +335,38 @@ class ListTest(ReadTest, unittest.TestCase):
         with support.swap_attr(sys, 'stdout', tio):
             self.tar.list(verbose=True)
         out = tio.detach().getvalue()
-        # Make sure it prints files separated by one newline with 'ls -l'-like
-        # accessories if verbose flag is being used
-        # ...
-        # ?rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/conttype
-        # -rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/regtype
-        # drwxr-xr-x tarfile/tarfile        0 2003-01-05 15:19:43 ustar/dirtype/
-        # ...
-        #
-        # Array of values to modify the regex below:
-        #  ((file_type, file_permissions, file_length), ...)
-        type_perm_lengths = (
-            (br'\?', b'rw-r--r--', b'7011'), (b'-', b'rw-r--r--', b'7011'),
-            (b'd', b'rwxr-xr-x', b'0'), (b'd', b'rwxr-xr-x', b'255'),
-            (br'\?', b'rw-r--r--', b'0'), (b'l', b'rwxrwxrwx', b'0'),
-            (b'b', b'rw-rw----', b'3,0'), (b'c', b'rw-rw-rw-', b'1,3'),
-            (b'p', b'rw-r--r--', b'0'))
-        self.assertRegex(out, b''.join(
-            [(tp + (br'%s tarfile/tarfile\s+%s ' % (perm, ln) +
-                    br'\d{4}-\d\d-\d\d\s+\d\d:\d\d:\d\d '
-                    br'ustar/\w+type[/>\sa-z-]*\n')) for tp, perm, ln
-             in type_perm_lengths]))
+        if sys.version_info >= (3, 13):
+            # Make sure it prints files separated by one newline with 'ls -l'-like
+            # accessories if verbose flag is being used
+            # ...
+            # ?rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/conttype
+            # -rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/regtype
+            # drwxr-xr-x tarfile/tarfile        0 2003-01-05 15:19:43 ustar/dirtype/
+            # ...
+            #
+            # Array of values to modify the regex below:
+            #  ((file_type, file_permissions, file_length), ...)
+            type_perm_lengths = (
+                (br'\?', b'rw-r--r--', b'7011'), (b'-', b'rw-r--r--', b'7011'),
+                (b'd', b'rwxr-xr-x', b'0'), (b'd', b'rwxr-xr-x', b'255'),
+                (br'\?', b'rw-r--r--', b'0'), (b'l', b'rwxrwxrwx', b'0'),
+                (b'b', b'rw-rw----', b'3,0'), (b'c', b'rw-rw-rw-', b'1,3'),
+                (b'p', b'rw-r--r--', b'0'))
+            self.assertRegex(out, b''.join(
+                [(tp + (br'%s tarfile/tarfile\s+%s ' % (perm, ln) +
+                        br'\d{4}-\d\d-\d\d\s+\d\d:\d\d:\d\d '
+                        br'ustar/\w+type[/>\sa-z-]*\n')) for tp, perm, ln
+                in type_perm_lengths]))
+        else:
+            # Make sure it prints files separated by one newline with 'ls -l'-like
+            # accessories if verbose flag is being used
+            # ...
+            # ?rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/conttype
+            # ?rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/regtype
+            # ...
+            self.assertRegex(out, (br'\?rw-r--r-- tarfile/tarfile\s+7011 '
+                                br'\d{4}-\d\d-\d\d\s+\d\d:\d\d:\d\d '
+                                br'ustar/\w+type ?\r?\n') * 2)
         # Make sure it prints the source of link with verbose flag
         self.assertIn(b'ustar/symtype -> regtype', out)
         self.assertIn(b'./ustar/linktest2/symtype -> ../linktest1/regtype', out)
@@ -521,13 +535,22 @@ class CommonReadTest(ReadTest):
             with tarfile.open(support.findfile('recursion.tar', subdir='archivetestdata')):
                 pass
 
+    @unittest.skipIf(sys.version_info >= (3, 13), "Requires Python <3.13")
+    def test_extractfile_name(self):
+        # gh-74468: TarFile.name must name a file, not a parent archive.
+        file = self.tar.getmember('ustar/regtype')
+        with self.tar.extractfile(file) as fobj:
+            self.assertEqual(fobj.name, 'ustar/regtype')
+
+    @unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
     def test_extractfile_attrs(self):
         # gh-74468: TarFile.name must name a file, not a parent archive.
         file = self.tar.getmember('ustar/regtype')
         with self.tar.extractfile(file) as fobj:
             self.assertEqual(fobj.name, 'ustar/regtype')
             self.assertRaises(AttributeError, fobj.fileno)
-            self.assertEqual(fobj.mode, 'rb')
+            if sys.version_info >= (3, 13):
+                self.assertEqual(fobj.mode, 'rb')
             self.assertIs(fobj.readable(), True)
             self.assertIs(fobj.writable(), False)
             if self.is_stream:
@@ -538,7 +561,8 @@ class CommonReadTest(ReadTest):
         self.assertIs(fobj.closed, True)
         self.assertEqual(fobj.name, 'ustar/regtype')
         self.assertRaises(AttributeError, fobj.fileno)
-        self.assertEqual(fobj.mode, 'rb')
+        if sys.version_info >= (3, 13):
+            self.assertEqual(fobj.mode, 'rb')
         self.assertIs(fobj.readable(), True)
         self.assertIs(fobj.writable(), False)
         if self.is_stream:
@@ -548,9 +572,13 @@ class CommonReadTest(ReadTest):
 
 
 class MiscReadTestBase(CommonReadTest):
-    is_stream = False
+    if sys.version_info >= (3, 13):
+        is_stream = False
+    def requires_name_attribute(self):
+        pass
 
     def test_no_name_argument(self):
+        self.requires_name_attribute()
         with open(self.tarname, "rb") as fobj:
             self.assertIsInstance(fobj.name, str)
             with tarfile.open(fileobj=fobj, mode=self.mode) as tar:
@@ -583,6 +611,7 @@ class MiscReadTestBase(CommonReadTest):
                 self.assertIsNone(tar.name)
 
     def test_bytes_name_attribute(self):
+        self.requires_name_attribute()
         tarname = os.fsencode(self.tarname)
         with open(tarname, 'rb') as fobj:
             self.assertIsInstance(fobj.name, bytes)
@@ -605,6 +634,7 @@ class MiscReadTestBase(CommonReadTest):
             with tarfile.TarFile(tarname, mode='r') as tar:
                 self.assertEqual(tar.name, expected)
 
+    @unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
     def test_pathlike_bytes_name(self):
         self.test_pathlike_name(os.fsencode(self.tarname))
 
@@ -752,6 +782,7 @@ class MiscReadTestBase(CommonReadTest):
         finally:
             os_helper.rmtree(DIR)
 
+    @unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
     def test_deprecation_if_no_filter_passed_to_extractall(self):
         DIR = pathlib.Path(TEMPDIR) / "extractall"
         with (
@@ -764,6 +795,7 @@ class MiscReadTestBase(CommonReadTest):
             # check that the stacklevel of the deprecation warning is correct:
             self.assertEqual(cm.filename, __file__)
 
+    @unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
     def test_deprecation_if_no_filter_passed_to_extract(self):
         dirtype = "ustar/dirtype"
         DIR = pathlib.Path(TEMPDIR) / "extractall"
@@ -853,10 +885,12 @@ class GzipMiscReadTest(GzipTest, MiscReadTestBase, unittest.TestCase):
     pass
 
 class Bz2MiscReadTest(Bz2Test, MiscReadTestBase, unittest.TestCase):
-    pass
+    def requires_name_attribute(self):
+        self.skipTest("BZ2File have no name attribute")
 
 class LzmaMiscReadTest(LzmaTest, MiscReadTestBase, unittest.TestCase):
-    pass
+    def requires_name_attribute(self):
+        self.skipTest("LZMAFile have no name attribute")
 
 class ZstdMiscReadTest(ZstdTest, MiscReadTestBase, unittest.TestCase):
     pass
@@ -864,7 +898,8 @@ class ZstdMiscReadTest(ZstdTest, MiscReadTestBase, unittest.TestCase):
 class StreamReadTest(CommonReadTest, unittest.TestCase):
 
     prefix="r|"
-    is_stream = True
+    if sys.version_info >= (3, 13):
+        is_stream = True
 
     def test_read_through(self):
         # Issue #11224: A poorly designed _FileInFile.read() method
@@ -1292,6 +1327,7 @@ class PaxReadTest(LongnameTest, ReadTest, unittest.TestCase):
         finally:
             tar.close()
 
+    @unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
     def test_pax_header_bad_formats(self):
         # The fields from the pax header have priority over the
         # TarInfo.
@@ -1670,8 +1706,12 @@ class WriteTest(WriteTestBase, unittest.TestCase):
                         raise exctype
 
             f = BadFile()
+            if sys.version_info >= (3, 13):
+                cm = warnings_helper.check_no_resource_warning(self)
+            else:
+                cm = nullcontext()
             with (
-                warnings_helper.check_no_resource_warning(self),
+                cm,
                 self.assertRaises(exctype),
             ):
                 tarfile.open(tmpname, self.mode, fileobj=f,
@@ -1679,6 +1719,7 @@ class WriteTest(WriteTestBase, unittest.TestCase):
                              pax_headers={'non': 'empty'})
             self.assertFalse(f.closed)
 
+    @unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
     def test_missing_fileobj(self):
         with tarfile.open(tmpname, self.mode) as tar:
             tarinfo = tar.gettarinfo(tarname)
@@ -3250,6 +3291,7 @@ class ReplaceTests(ReadTest, unittest.TestCase):
             member.replace(offset=123456789)
 
 
+@unittest.skipIf(sys.version_info < (3, 13) and platform.architecture()[0] != "64bit", "gh-107811")
 class NoneInfoExtractTests(ReadTest):
     # These mainly check that all kinds of members are extracted successfully
     # if some metadata is None.
@@ -3372,8 +3414,11 @@ class NoneInfoTests_Misc(unittest.TestCase):
                 tar = tarfile.open(fileobj=bio, mode='w', format=tarformat)
                 tarinfo = tar.gettarinfo(tarname)
                 try:
-                    with open(tarname, 'rb') as f:
-                        tar.addfile(tarinfo, f)
+                    if sys.version_info >= (3, 13):
+                        with open(tarname, 'rb') as f:
+                            tar.addfile(tarinfo, f)
+                    else:
+                        tar.addfile(tarinfo)
                 except Exception:
                     if tarformat == tarfile.USTAR_FORMAT:
                         # In the old, limited format, adding might fail for
@@ -3388,8 +3433,11 @@ class NoneInfoTests_Misc(unittest.TestCase):
                             replaced = tarinfo.replace(**{attr_name: None})
                             with self.assertRaisesRegex(ValueError,
                                                         f"{attr_name}"):
-                                with open(tarname, 'rb') as f:
-                                    tar.addfile(replaced, f)
+                                if sys.version_info >= (3, 13):
+                                    with open(tarname, 'rb') as f:
+                                        tar.addfile(replaced, f)
+                                else:
+                                    tar.addfile(replaced)
 
     def test_list(self):
         # Change some metadata to None, then compare list() output
@@ -3964,7 +4012,8 @@ class TestExtractionFilters(unittest.TestCase):
             arc.add('read_group_only', mode='?---r-----')
             arc.add('no_bits', mode='?---------')
             arc.add('dir/', mode='?---rwsrwt')
-            arc.add('dir_all_bits/', mode='?rwsrwsrwt')
+            if sys.version_info >= (3, 13):
+                arc.add('dir_all_bits/', mode='?rwsrwsrwt')
 
         # On some systems, setting the uid, gid, and/or sticky bit is a no-ops.
         # Check which bits we can set, so we can compare tarfile machinery to
@@ -3973,46 +4022,66 @@ class TestExtractionFilters(unittest.TestCase):
         with open(tmp_filename, 'w'):
             pass
         try:
-            new_mode = (os.stat(tmp_filename).st_mode
-                        | stat.S_ISVTX | stat.S_ISGID | stat.S_ISUID)
-            try:
-                os.chmod(tmp_filename, new_mode)
-            except OSError as exc:
-                if exc.errno == getattr(errno, "EFTYPE", 0):
-                    # gh-108948: On FreeBSD, regular users cannot set
-                    # the sticky bit.
-                    self.skipTest("chmod() failed with EFTYPE: "
-                                  "regular users cannot set sticky bit")
-                else:
-                    raise
+            if sys.version_info >= (3, 13):
+                try:
+                    new_mode = (os.stat(tmp_filename).st_mode
+                                | stat.S_ISVTX | stat.S_ISGID | stat.S_ISUID)
+                    os.chmod(tmp_filename, new_mode)
+                except OSError as exc:
+                    if exc.errno == getattr(errno, "EFTYPE", 0):
+                        # gh-108948: On FreeBSD, regular users cannot set
+                        # the sticky bit.
+                        self.skipTest("chmod() failed with EFTYPE: "
+                                    "regular users cannot set sticky bit")
+                    else:
+                        raise
 
-            got_mode = os.stat(tmp_filename).st_mode
-            _t_file = 't' if (got_mode & stat.S_ISVTX) else 'x'
-            _suid_file = 's' if (got_mode & stat.S_ISUID) else 'x'
-            _sgid_file = 's' if (got_mode & stat.S_ISGID) else 'x'
+                got_mode = os.stat(tmp_filename).st_mode
+                _t_file = 't' if (got_mode & stat.S_ISVTX) else 'x'
+                _suid_file = 's' if (got_mode & stat.S_ISUID) else 'x'
+                _sgid_file = 's' if (got_mode & stat.S_ISGID) else 'x'
+            else:
+                os.chmod(tmp_filename, os.stat(tmp_filename).st_mode | stat.S_ISVTX)
+                have_sticky_files = (os.stat(tmp_filename).st_mode & stat.S_ISVTX)
         finally:
             os.unlink(tmp_filename)
 
         os.mkdir(tmp_filename)
-        new_mode = (os.stat(tmp_filename).st_mode
-                    | stat.S_ISVTX | stat.S_ISGID | stat.S_ISUID)
-        os.chmod(tmp_filename, new_mode)
-        got_mode = os.stat(tmp_filename).st_mode
-        _t_dir = 't' if (got_mode & stat.S_ISVTX) else 'x'
-        _suid_dir = 's' if (got_mode & stat.S_ISUID) else 'x'
-        _sgid_dir = 's' if (got_mode & stat.S_ISGID) else 'x'
+        if sys.version_info >= (3, 13):
+            new_mode = (os.stat(tmp_filename).st_mode
+                        | stat.S_ISVTX | stat.S_ISGID | stat.S_ISUID)
+            os.chmod(tmp_filename, new_mode)
+            got_mode = os.stat(tmp_filename).st_mode
+            _t_dir = 't' if (got_mode & stat.S_ISVTX) else 'x'
+            _suid_dir = 's' if (got_mode & stat.S_ISUID) else 'x'
+            _sgid_dir = 's' if (got_mode & stat.S_ISGID) else 'x'
+        else:
+            os.chmod(tmp_filename, os.stat(tmp_filename).st_mode | stat.S_ISVTX)
+            have_sticky_dirs = (os.stat(tmp_filename).st_mode & stat.S_ISVTX)
         os.rmdir(tmp_filename)
 
         with self.check_context(arc.open(), 'fully_trusted'):
-            self.expect_file('all_bits',
-                             mode=f'?rw{_suid_file}rw{_sgid_file}rw{_t_file}')
+            if sys.version_info >= (3, 13):
+                self.expect_file('all_bits',
+                                mode=f'?rw{_suid_file}rw{_sgid_file}rw{_t_file}')
+            else:
+                if have_sticky_files:
+                    self.expect_file('all_bits', mode='?rwsrwsrwt')
+                else:
+                    self.expect_file('all_bits', mode='?rwsrwsrwx')
             self.expect_file('perm_bits', mode='?rwxrwxrwx')
             self.expect_file('exec_group_other', mode='?rw-rwxrwx')
             self.expect_file('read_group_only', mode='?---r-----')
             self.expect_file('no_bits', mode='?---------')
-            self.expect_file('dir/', mode=f'?---rw{_sgid_dir}rw{_t_dir}')
-            self.expect_file('dir_all_bits/',
-                             mode=f'?rw{_suid_dir}rw{_sgid_dir}rw{_t_dir}')
+            if sys.version_info >= (3, 13):
+                self.expect_file('dir/', mode=f'?---rw{_sgid_dir}rw{_t_dir}')
+                self.expect_file('dir_all_bits/',
+                                mode=f'?rw{_suid_dir}rw{_sgid_dir}rw{_t_dir}')
+            else:
+                if have_sticky_dirs:
+                    self.expect_file('dir/', mode='?---rwsrwt')
+                else:
+                    self.expect_file('dir/', mode='?---rwsrwx')
 
         with self.check_context(arc.open(), 'tar'):
             self.expect_file('all_bits', mode='?rwxr-xr-x')
@@ -4021,7 +4090,8 @@ class TestExtractionFilters(unittest.TestCase):
             self.expect_file('read_group_only', mode='?---r-----')
             self.expect_file('no_bits', mode='?---------')
             self.expect_file('dir/', mode='?---r-xr-x')
-            self.expect_file('dir_all_bits/', mode='?rwxr-xr-x')
+            if sys.version_info >= (3, 13):
+                self.expect_file('dir_all_bits/', mode='?rwxr-xr-x')
 
         with self.check_context(arc.open(), 'data'):
             normal_dir_mode = stat.filemode(stat.S_IMODE(
@@ -4032,7 +4102,8 @@ class TestExtractionFilters(unittest.TestCase):
             self.expect_file('read_group_only', mode='?rw-r-----')
             self.expect_file('no_bits', mode='?rw-------')
             self.expect_file('dir/', mode=normal_dir_mode)
-            self.expect_file('dir_all_bits/', mode=normal_dir_mode)
+            if sys.version_info >= (3, 13):
+                self.expect_file('dir_all_bits/', mode=normal_dir_mode)
 
     def test_pipe(self):
         # Test handling of a special file
@@ -4271,6 +4342,7 @@ class TestExtractionFilters(unittest.TestCase):
             self.expect_exception(TypeError)  # errorlevel is not int
 
 
+@unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
 class OverwriteTests(archiver_tests.OverwriteTests, unittest.TestCase):
     testdir = os.path.join(TEMPDIR, "testoverwrite")
 
