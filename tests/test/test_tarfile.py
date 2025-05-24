@@ -112,6 +112,8 @@ class ReadTest(TarTest):
     def tearDown(self):
         self.tar.close()
 
+
+@unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
 class StreamModeTest(ReadTest):
 
     # Only needs to change how the tarfile is opened to set
@@ -332,27 +334,38 @@ class ListTest(ReadTest, unittest.TestCase):
         with support.swap_attr(sys, 'stdout', tio):
             self.tar.list(verbose=True)
         out = tio.detach().getvalue()
-        # Make sure it prints files separated by one newline with 'ls -l'-like
-        # accessories if verbose flag is being used
-        # ...
-        # ?rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/conttype
-        # -rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/regtype
-        # drwxr-xr-x tarfile/tarfile        0 2003-01-05 15:19:43 ustar/dirtype/
-        # ...
-        #
-        # Array of values to modify the regex below:
-        #  ((file_type, file_permissions, file_length), ...)
-        type_perm_lengths = (
-            (br'\?', b'rw-r--r--', b'7011'), (b'-', b'rw-r--r--', b'7011'),
-            (b'd', b'rwxr-xr-x', b'0'), (b'd', b'rwxr-xr-x', b'255'),
-            (br'\?', b'rw-r--r--', b'0'), (b'l', b'rwxrwxrwx', b'0'),
-            (b'b', b'rw-rw----', b'3,0'), (b'c', b'rw-rw-rw-', b'1,3'),
-            (b'p', b'rw-r--r--', b'0'))
-        self.assertRegex(out, b''.join(
-            [(tp + (br'%s tarfile/tarfile\s+%s ' % (perm, ln) +
-                    br'\d{4}-\d\d-\d\d\s+\d\d:\d\d:\d\d '
-                    br'ustar/\w+type[/>\sa-z-]*\n')) for tp, perm, ln
-             in type_perm_lengths]))
+        if sys.version_info >= (3, 13):
+            # Make sure it prints files separated by one newline with 'ls -l'-like
+            # accessories if verbose flag is being used
+            # ...
+            # ?rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/conttype
+            # -rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/regtype
+            # drwxr-xr-x tarfile/tarfile        0 2003-01-05 15:19:43 ustar/dirtype/
+            # ...
+            #
+            # Array of values to modify the regex below:
+            #  ((file_type, file_permissions, file_length), ...)
+            type_perm_lengths = (
+                (br'\?', b'rw-r--r--', b'7011'), (b'-', b'rw-r--r--', b'7011'),
+                (b'd', b'rwxr-xr-x', b'0'), (b'd', b'rwxr-xr-x', b'255'),
+                (br'\?', b'rw-r--r--', b'0'), (b'l', b'rwxrwxrwx', b'0'),
+                (b'b', b'rw-rw----', b'3,0'), (b'c', b'rw-rw-rw-', b'1,3'),
+                (b'p', b'rw-r--r--', b'0'))
+            self.assertRegex(out, b''.join(
+                [(tp + (br'%s tarfile/tarfile\s+%s ' % (perm, ln) +
+                        br'\d{4}-\d\d-\d\d\s+\d\d:\d\d:\d\d '
+                        br'ustar/\w+type[/>\sa-z-]*\n')) for tp, perm, ln
+                in type_perm_lengths]))
+        else:
+            # Make sure it prints files separated by one newline with 'ls -l'-like
+            # accessories if verbose flag is being used
+            # ...
+            # ?rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/conttype
+            # ?rw-r--r-- tarfile/tarfile     7011 2003-01-06 07:19:43 ustar/regtype
+            # ...
+            self.assertRegex(out, (br'\?rw-r--r-- tarfile/tarfile\s+7011 '
+                                br'\d{4}-\d\d-\d\d\s+\d\d:\d\d:\d\d '
+                                br'ustar/\w+type ?\r?\n') * 2)
         # Make sure it prints the source of link with verbose flag
         self.assertIn(b'ustar/symtype -> regtype', out)
         self.assertIn(b'./ustar/linktest2/symtype -> ../linktest1/regtype', out)
@@ -527,7 +540,8 @@ class CommonReadTest(ReadTest):
         with self.tar.extractfile(file) as fobj:
             self.assertEqual(fobj.name, 'ustar/regtype')
             self.assertRaises(AttributeError, fobj.fileno)
-            self.assertEqual(fobj.mode, 'rb')
+            if sys.version_info >= (3, 13):
+                self.assertEqual(fobj.mode, 'rb')
             self.assertIs(fobj.readable(), True)
             self.assertIs(fobj.writable(), False)
             if self.is_stream:
@@ -538,7 +552,8 @@ class CommonReadTest(ReadTest):
         self.assertIs(fobj.closed, True)
         self.assertEqual(fobj.name, 'ustar/regtype')
         self.assertRaises(AttributeError, fobj.fileno)
-        self.assertEqual(fobj.mode, 'rb')
+        if sys.version_info >= (3, 13):
+            self.assertEqual(fobj.mode, 'rb')
         self.assertIs(fobj.readable(), True)
         self.assertIs(fobj.writable(), False)
         if self.is_stream:
@@ -549,8 +564,11 @@ class CommonReadTest(ReadTest):
 
 class MiscReadTestBase(CommonReadTest):
     is_stream = False
+    def requires_name_attribute(self):
+        pass
 
     def test_no_name_argument(self):
+        self.requires_name_attribute()
         with open(self.tarname, "rb") as fobj:
             self.assertIsInstance(fobj.name, str)
             with tarfile.open(fileobj=fobj, mode=self.mode) as tar:
@@ -583,6 +601,7 @@ class MiscReadTestBase(CommonReadTest):
                 self.assertIsNone(tar.name)
 
     def test_bytes_name_attribute(self):
+        self.requires_name_attribute()
         tarname = os.fsencode(self.tarname)
         with open(tarname, 'rb') as fobj:
             self.assertIsInstance(fobj.name, bytes)
@@ -853,10 +872,12 @@ class GzipMiscReadTest(GzipTest, MiscReadTestBase, unittest.TestCase):
     pass
 
 class Bz2MiscReadTest(Bz2Test, MiscReadTestBase, unittest.TestCase):
-    pass
+    def requires_name_attribute(self):
+        self.skipTest("BZ2File have no name attribute")
 
 class LzmaMiscReadTest(LzmaTest, MiscReadTestBase, unittest.TestCase):
-    pass
+    def requires_name_attribute(self):
+        self.skipTest("LZMAFile have no name attribute")
 
 class ZstdMiscReadTest(ZstdTest, MiscReadTestBase, unittest.TestCase):
     pass
@@ -1679,6 +1700,7 @@ class WriteTest(WriteTestBase, unittest.TestCase):
                              pax_headers={'non': 'empty'})
             self.assertFalse(f.closed)
 
+    @unittest.skipIf(sys.version_info < (3, 13), "Requires Python 3.13")
     def test_missing_fileobj(self):
         with tarfile.open(tmpname, self.mode) as tar:
             tarinfo = tar.gettarinfo(tarname)
