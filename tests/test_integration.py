@@ -1,12 +1,19 @@
 import sys
-import unittest
-from io import BytesIO
-from secrets import token_bytes, token_urlsafe
 
 if sys.version_info < (3, 14):
     from backports import zstd
+
+    zstd.patch_tarfile()
+
 else:
     from compression import zstd
+
+import unittest
+from io import BytesIO
+from secrets import token_bytes, token_urlsafe
+import tarfile
+from tempfile import TemporaryDirectory
+from pathlib import Path
 
 
 # these tests are simple checks for main use cases
@@ -63,6 +70,21 @@ class TestCompat(unittest.TestCase):
         with zstd.open(fobj, "rt") as fzstd:
             self.assertEqual(fzstd.read(), raw)
         self.assertTrue(fobj.tell() > 0)
+
+    def test_tarfile(self):
+        raw = token_bytes(1_000)
+        raw_name = token_urlsafe(10)
+        with TemporaryDirectory() as tmpfile:
+            path = Path(tmpfile) / "archive.tar.zst"
+            with tarfile.open(path, "w:zst") as tf:
+                ti = tarfile.TarInfo(raw_name)
+                ti.size = len(raw)
+                tf.addfile(ti, BytesIO(raw))
+
+            with tarfile.open(path) as tf:
+                self.assertEqual(tf.getnames(), [raw_name])
+                with tf.extractfile(raw_name) as fobj:
+                    self.assertEqual(fobj.read(), raw)
 
 
 if __name__ == "__main__":
