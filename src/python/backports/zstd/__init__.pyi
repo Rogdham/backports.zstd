@@ -51,6 +51,8 @@ __all__ = (
     "ZstdDecompressor",
     "ZstdDict",
     "ZstdError",
+    # backports.zstd specifics
+    "patch_tarfile",
 )
 
 zstd_version_info: Final[tuple[int, int, int]]
@@ -310,3 +312,9 @@ def get_frame_size(frame_buffer: ReadableBuffer) -> int: ...
 zstd_version: Final[str]
 
 zstd_version_number: Final[int]
+
+#
+# _tarfile
+#
+
+def patch_tarfile() -> None: ...

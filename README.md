@@ -36,16 +36,29 @@ backports.zstd ; python_version<'3.14'
 
 ## Usage
 
-Use the following conditional import:
+Use a conditional import based of the Python version:
 
 ```python
 import sys
 
 if sys.version_info < (3, 14):
     from backports import zstd
+
+    # optional: patch modules that use zstd internally
+    zstd.patch_tarfile()
+
 else:
     from compression import zstd
+
+# modules that use zstd internally can now be imported
+import tarfile  # example
 ```
+
+> [!IMPORTANT]
+>
+> Patching should be done as early as possible in the lifecycle of the program. For
+> example, the main module should begin with the calls to the patch functions, ideally
+> before any other imports.
 
 Refer to the [official Python documentation][python-doc] for usage of the module.
 
