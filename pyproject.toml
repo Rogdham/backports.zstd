@@ -35,5 +35,4 @@ build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
 wheel.packages = ["src/python/backports"]
-# Use a re-used build dir for faster rebuilds
-build-dir = "build/{wheel_tag}"
+build-dir = "build/{wheel_tag}"           # reuse from previous runs (faster)

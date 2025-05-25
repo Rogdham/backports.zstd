@@ -13,6 +13,10 @@ adheres to [Semantic Versioning](https://semver.org/).
 - Enable zstd multithreading support
 - Build wheels for more architectures
 
+### :house: Internal
+
+- Change build system from `setuptools` to `scikit-build-core`
+
 ## [0.1.0] - 2025-05-08
 
 [0.1.0]: https://github.com/rogdham/backports.zstd/releases/tag/v0.1.0
