@@ -1,5 +1,8 @@
 recursive-include src *
 recursive-include tests *
+recursive-exclude src/c/pythoncapi-compat *
+include src/c/pythoncapi-compat/COPYING
+include src/c/pythoncapi-compat/pythoncapi_compat.h
 recursive-exclude src/c/zstd *
 include src/c/zstd/COPYING
 include src/c/zstd/LICENSE

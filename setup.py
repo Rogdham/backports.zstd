@@ -27,9 +27,10 @@ setup(
                 *locate_sources("src", "c", "zstd", "lib", "dictBuilder"),
             ],
             include_dirs=[
+                "src/c/compat",
                 "src/c/compression_zstd",
                 "src/c/compression_zstd/clinic",
-                "src/c/compat",
+                "src/c/pythoncapi-compat",
                 "src/c/zstd/lib",
                 "src/c/zstd/lib/common",
                 "src/c/zstd/lib/dictBuilder",

@@ -1,3 +1,6 @@
+[submodule "pythoncapi-compat"]
+	path = src/c/pythoncapi-compat
+	url = https://github.com/python/pythoncapi-compat
 [submodule "zstd"]
 	path = src/c/zstd
 	url = https://github.com/facebook/zstd.git
