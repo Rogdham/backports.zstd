@@ -46,3 +46,7 @@ if sys.version_info < (3, 14):
 else:
     from compression import zstd
 ```
+
+Refer to the [official Python documentation][python-doc] for usage of the module.
+
+[python-doc]: https://docs.python.org/3.14/library/compression.zstd.html

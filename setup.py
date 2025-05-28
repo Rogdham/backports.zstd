@@ -40,7 +40,7 @@ setup(
             else ["-g0", "-flto"],
             extra_link_args=[] if _PLATFORM_IS_WIN else ["-g0", "-flto"],
             define_macros=[
-                ("ZSTD_MULTITHREAD", None)  # enable multithreading support
+                ("ZSTD_MULTITHREAD", None),  # enable multithreading support
             ],
         ),
     ],
