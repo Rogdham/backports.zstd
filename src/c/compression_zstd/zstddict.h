@@ -3,6 +3,8 @@
 #ifndef ZSTD_DICT_H
 #define ZSTD_DICT_H
 
+#include "backports_zstd_redef.h"
+
 #include <zstd.h>                 // ZSTD_DDict
 
 typedef struct {
@@ -21,7 +23,7 @@ typedef struct {
     uint32_t dict_id;
 
     /* Lock to protect the digested dictionaries */
-    PyMutex lock;
+    _backportszstdredef_PyMutex lock;
 } ZstdDict;
 
 #endif  // !ZSTD_DICT_H

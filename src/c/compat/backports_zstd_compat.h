@@ -17,31 +17,6 @@ static inline int PyType_Freeze(PyTypeObject *type)
 #if PY_VERSION_HEX < 0x030D0000 // Python 3.12 and below
 #define Py_mod_gil 0
 #define Py_MOD_GIL_NOT_USED NULL
-typedef struct PyMutex
-{
-    uint8_t _bits;
-} PyMutex;
-static inline void PyMutex_Lock(PyMutex *m)
-{
-    // FIXME real implementation
-    if (m->_bits < 2)
-    {
-        m->_bits++;
-    }
-    if (m->_bits >= 2)
-    {
-        Py_FatalError("[backports.zstd] Not implemented: PyMutex_Lock");
-    }
-}
-static inline void PyMutex_Unlock(PyMutex *m)
-{
-    // FIXME real implementation
-    if (m->_bits < 1)
-    {
-        Py_FatalError("[backports.zstd] Not implemented: PyMutex_Unlock");
-    }
-    m->_bits--;
-}
 #endif
 
 #if PY_VERSION_HEX < 0x030C0000 // Python 3.11 and below

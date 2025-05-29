@@ -13,6 +13,7 @@ class _zstd.ZstdDecompressor "ZstdDecompressor *" "&zstd_decompressor_type_spec"
 #endif
 
 #include "backports_zstd_compat.h"
+#include "backports_zstd_redef.h"
 
 #include "Python.h"
 
@@ -49,7 +50,7 @@ typedef struct {
     bool eof;
 
     /* Lock to protect the decompression context */
-    PyMutex lock;
+    _backportszstdredef_PyMutex lock;
 } ZstdDecompressor;
 
 #define ZstdDecompressor_CAST(op) ((ZstdDecompressor *)op)
@@ -59,7 +60,7 @@ typedef struct {
 static inline ZSTD_DDict *
 _get_DDict(ZstdDict *self)
 {
-    assert(PyMutex_IsLocked(&self->lock));
+    assert(_backportszstdredef_PyMutex_IsLocked(&self->lock));
     ZSTD_DDict *ret;
 
     /* Already created */
@@ -208,9 +209,9 @@ _zstd_load_d_dict(ZstdDecompressor *self, PyObject *dict)
         /* When decompressing, use digested dictionary by default. */
         zd = (ZstdDict*)dict;
         type = DICT_TYPE_DIGESTED;
-        PyMutex_Lock(&zd->lock);
+        _backportszstdredef_PyMutex_Lock(&zd->lock);
         ret = _zstd_load_impl(self, zd, mod_state, type);
-        PyMutex_Unlock(&zd->lock);
+        _backportszstdredef_PyMutex_Unlock(&zd->lock);
         return ret;
     }
 
@@ -231,9 +232,9 @@ _zstd_load_d_dict(ZstdDecompressor *self, PyObject *dict)
             {
                 assert(type >= 0);
                 zd = (ZstdDict*)PyTuple_GET_ITEM(dict, 0);
-                PyMutex_Lock(&zd->lock);
+                _backportszstdredef_PyMutex_Lock(&zd->lock);
                 ret = _zstd_load_impl(self, zd, mod_state, type);
-                PyMutex_Unlock(&zd->lock);
+                _backportszstdredef_PyMutex_Unlock(&zd->lock);
                 return ret;
             }
         }
@@ -343,7 +344,7 @@ error:
 static void
 decompressor_reset_session_lock_held(ZstdDecompressor *self)
 {
-    assert(PyMutex_IsLocked(&self->lock));
+    assert(_backportszstdredef_PyMutex_IsLocked(&self->lock));
 
     /* Reset variables */
     self->in_begin = 0;
@@ -363,7 +364,7 @@ static PyObject *
 stream_decompress_lock_held(ZstdDecompressor *self, Py_buffer *data,
                             Py_ssize_t max_length)
 {
-    assert(PyMutex_IsLocked(&self->lock));
+    assert(_backportszstdredef_PyMutex_IsLocked(&self->lock));
     ZSTD_inBuffer in;
     PyObject *ret = NULL;
     int use_input_buffer;
@@ -559,7 +560,7 @@ _zstd_ZstdDecompressor_new_impl(PyTypeObject *type, PyObject *zstd_dict,
     self->unused_data = NULL;
     self->eof = 0;
     self->dict = NULL;
-    self->lock = (PyMutex){0};
+    self->lock = _backportszstdredef_PyMutex_Init();
 
     /* needs_input flag */
     self->needs_input = 1;
@@ -613,7 +614,7 @@ ZstdDecompressor_dealloc(PyObject *ob)
         ZSTD_freeDCtx(self->dctx);
     }
 
-    assert(!PyMutex_IsLocked(&self->lock));
+    assert(!_backportszstdredef_PyMutex_IsLocked(&self->lock));
 
     /* Py_CLEAR the dict after free decompression context */
     Py_CLEAR(self->dict);
@@ -645,10 +646,10 @@ _zstd_ZstdDecompressor_unused_data_get_impl(ZstdDecompressor *self)
 {
     PyObject *ret;
 
-    PyMutex_Lock(&self->lock);
+    _backportszstdredef_PyMutex_Lock(&self->lock);
 
     if (!self->eof) {
-        PyMutex_Unlock(&self->lock);
+        _backportszstdredef_PyMutex_Unlock(&self->lock);
         return Py_GetConstant(Py_CONSTANT_EMPTY_BYTES);
     }
     else {
@@ -665,7 +666,7 @@ _zstd_ZstdDecompressor_unused_data_get_impl(ZstdDecompressor *self)
         }
     }
 
-    PyMutex_Unlock(&self->lock);
+    _backportszstdredef_PyMutex_Unlock(&self->lock);
     return ret;
 }
 
@@ -703,9 +704,9 @@ _zstd_ZstdDecompressor_decompress_impl(ZstdDecompressor *self,
 {
     PyObject *ret;
     /* Thread-safe code */
-    PyMutex_Lock(&self->lock);
+    _backportszstdredef_PyMutex_Lock(&self->lock);
     ret = stream_decompress_lock_held(self, data, max_length);
-    PyMutex_Unlock(&self->lock);
+    _backportszstdredef_PyMutex_Unlock(&self->lock);
     return ret;
 }
 

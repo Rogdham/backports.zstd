@@ -13,6 +13,7 @@ class _zstd.ZstdCompressor "ZstdCompressor *" "&zstd_compressor_type_spec"
 #endif
 
 #include "backports_zstd_compat.h"
+#include "backports_zstd_redef.h"
 
 #include "Python.h"
 
@@ -42,7 +43,7 @@ typedef struct {
     int compression_level;
 
     /* Lock to protect the compression context */
-    PyMutex lock;
+    _backportszstdredef_PyMutex lock;
 } ZstdCompressor;
 
 #define ZstdCompressor_CAST(op) ((ZstdCompressor *)op)
@@ -154,7 +155,7 @@ capsule_free_cdict(PyObject *capsule)
 ZSTD_CDict *
 _get_CDict(ZstdDict *self, int compressionLevel)
 {
-    assert(PyMutex_IsLocked(&self->lock));
+    assert(_backportszstdredef_PyMutex_IsLocked(&self->lock));
     PyObject *level = NULL;
     PyObject *capsule = NULL;
     ZSTD_CDict *cdict;
@@ -280,9 +281,9 @@ _zstd_load_c_dict(ZstdCompressor *self, PyObject *dict)
         /* When compressing, use undigested dictionary by default. */
         zd = (ZstdDict*)dict;
         type = DICT_TYPE_UNDIGESTED;
-        PyMutex_Lock(&zd->lock);
+        _backportszstdredef_PyMutex_Lock(&zd->lock);
         ret = _zstd_load_impl(self, zd, mod_state, type);
-        PyMutex_Unlock(&zd->lock);
+        _backportszstdredef_PyMutex_Unlock(&zd->lock);
         return ret;
     }
 
@@ -303,9 +304,9 @@ _zstd_load_c_dict(ZstdCompressor *self, PyObject *dict)
             {
                 assert(type >= 0);
                 zd = (ZstdDict*)PyTuple_GET_ITEM(dict, 0);
-                PyMutex_Lock(&zd->lock);
+                _backportszstdredef_PyMutex_Lock(&zd->lock);
                 ret = _zstd_load_impl(self, zd, mod_state, type);
-                PyMutex_Unlock(&zd->lock);
+                _backportszstdredef_PyMutex_Unlock(&zd->lock);
                 return ret;
             }
         }
@@ -345,7 +346,7 @@ _zstd_ZstdCompressor_new_impl(PyTypeObject *type, PyObject *level,
 
     self->use_multithread = 0;
     self->dict = NULL;
-    self->lock = (PyMutex){0};
+    self->lock = _backportszstdredef_PyMutex_Init();
 
     /* Compression context */
     self->cctx = ZSTD_createCCtx();
@@ -411,7 +412,7 @@ ZstdCompressor_dealloc(PyObject *ob)
         ZSTD_freeCCtx(self->cctx);
     }
 
-    assert(!PyMutex_IsLocked(&self->lock));
+    assert(!_backportszstdredef_PyMutex_IsLocked(&self->lock));
 
     /* Py_XDECREF the dict after free the compression context */
     Py_CLEAR(self->dict);
@@ -425,7 +426,7 @@ static PyObject *
 compress_lock_held(ZstdCompressor *self, Py_buffer *data,
                    ZSTD_EndDirective end_directive)
 {
-    assert(PyMutex_IsLocked(&self->lock));
+    assert(_backportszstdredef_PyMutex_IsLocked(&self->lock));
     ZSTD_inBuffer in;
     ZSTD_outBuffer out;
     _BlocksOutputBuffer buffer = {.list = NULL};
@@ -508,7 +509,7 @@ mt_continue_should_break(ZSTD_inBuffer *in, ZSTD_outBuffer *out)
 static PyObject *
 compress_mt_continue_lock_held(ZstdCompressor *self, Py_buffer *data)
 {
-    assert(PyMutex_IsLocked(&self->lock));
+    assert(_backportszstdredef_PyMutex_IsLocked(&self->lock));
     ZSTD_inBuffer in;
     ZSTD_outBuffer out;
     _BlocksOutputBuffer buffer = {.list = NULL};
@@ -603,7 +604,7 @@ _zstd_ZstdCompressor_compress_impl(ZstdCompressor *self, Py_buffer *data,
     }
 
     /* Thread-safe code */
-    PyMutex_Lock(&self->lock);
+    _backportszstdredef_PyMutex_Lock(&self->lock);
 
     /* Compress */
     if (self->use_multithread && mode == ZSTD_e_continue) {
@@ -622,7 +623,7 @@ _zstd_ZstdCompressor_compress_impl(ZstdCompressor *self, Py_buffer *data,
         /* Resetting cctx's session never fail */
         ZSTD_CCtx_reset(self->cctx, ZSTD_reset_session_only);
     }
-    PyMutex_Unlock(&self->lock);
+    _backportszstdredef_PyMutex_Unlock(&self->lock);
 
     return ret;
 }
@@ -657,7 +658,7 @@ _zstd_ZstdCompressor_flush_impl(ZstdCompressor *self, int mode)
     }
 
     /* Thread-safe code */
-    PyMutex_Lock(&self->lock);
+    _backportszstdredef_PyMutex_Lock(&self->lock);
 
     ret = compress_lock_held(self, NULL, mode);
 
@@ -670,7 +671,7 @@ _zstd_ZstdCompressor_flush_impl(ZstdCompressor *self, int mode)
         /* Resetting cctx's session never fail */
         ZSTD_CCtx_reset(self->cctx, ZSTD_reset_session_only);
     }
-    PyMutex_Unlock(&self->lock);
+    _backportszstdredef_PyMutex_Unlock(&self->lock);
 
     return ret;
 }
