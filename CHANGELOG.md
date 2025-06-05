@@ -15,6 +15,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 - Support for CPython 3.10, 3.11 and 3.12
 - Enable zstd multithreading support
+- Add type hints
 - Build wheels for more architectures
 
 ## [0.1.0] - 2025-05-08
