@@ -2,7 +2,7 @@
 preserve
 [clinic start generated code]*/
 
-#include "backports_zstd_redef.h"
+#include "backports_zstd_edits.h"
 
 PyDoc_STRVAR(_zstd_ZstdCompressor___init____doc__,
 "ZstdCompressor(level=None, options=None, zstd_dict=None)\n"
@@ -63,7 +63,7 @@ _zstd_ZstdCompressor___init__(PyObject *self, PyObject *args, PyObject *kwargs)
     PyObject *options = Py_None;
     PyObject *zstd_dict = Py_None;
 
-    fastargs = _backportszstdredef__PyArg_UnpackKeywords(_PyTuple_CAST(args)->ob_item, nargs, kwargs, NULL, &_parser,
+    fastargs = BACKPORTSZSTD__PyArg_UnpackKeywords(_PyTuple_CAST(args)->ob_item, nargs, kwargs, NULL, &_parser,
             /*minpos*/ 0, /*maxpos*/ 3, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
     if (!fastargs) {
         goto exit;
@@ -148,7 +148,7 @@ _zstd_ZstdCompressor_compress(PyObject *self, PyObject *const *args, Py_ssize_t 
     Py_buffer data = {NULL, NULL};
     int mode = ZSTD_e_continue;
 
-    args = _backportszstdredef__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+    args = BACKPORTSZSTD__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 1, /*maxpos*/ 2, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
     if (!args) {
         goto exit;
@@ -230,7 +230,7 @@ _zstd_ZstdCompressor_flush(PyObject *self, PyObject *const *args, Py_ssize_t nar
     Py_ssize_t noptargs = nargs + (kwnames ? PyTuple_GET_SIZE(kwnames) : 0) - 0;
     int mode = ZSTD_e_end;
 
-    args = _backportszstdredef__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+    args = BACKPORTSZSTD__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 0, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
     if (!args) {
         goto exit;

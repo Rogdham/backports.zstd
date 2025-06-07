@@ -2,7 +2,7 @@
 preserve
 [clinic start generated code]*/
 
-#include "backports_zstd_redef.h"
+#include "backports_zstd_edits.h"
 
 PyDoc_STRVAR(_zstd_ZstdDict___init____doc__,
 "ZstdDict(dict_content, is_raw=False)\n"
@@ -64,7 +64,7 @@ _zstd_ZstdDict___init__(PyObject *self, PyObject *args, PyObject *kwargs)
     PyObject *dict_content;
     int is_raw = 0;
 
-    fastargs = _backportszstdredef__PyArg_UnpackKeywords(_PyTuple_CAST(args)->ob_item, nargs, kwargs, NULL, &_parser,
+    fastargs = BACKPORTSZSTD__PyArg_UnpackKeywords(_PyTuple_CAST(args)->ob_item, nargs, kwargs, NULL, &_parser,
             /*minpos*/ 1, /*maxpos*/ 2, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
     if (!fastargs) {
         goto exit;

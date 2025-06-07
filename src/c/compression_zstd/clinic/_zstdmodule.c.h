@@ -2,7 +2,7 @@
 preserve
 [clinic start generated code]*/
 
-#include "backports_zstd_redef.h"
+#include "backports_zstd_edits.h"
 
 PyDoc_STRVAR(_zstd__train_dict__doc__,
 "_train_dict($module, samples_bytes, samples_sizes, dict_size, /)\n"
@@ -32,22 +32,22 @@ _zstd__train_dict(PyObject *module, PyObject *const *args, Py_ssize_t nargs)
     PyObject *samples_sizes;
     Py_ssize_t dict_size;
 
-    if (!_backportszstdredef__PyArg_CheckPositional("_train_dict", nargs, 3, 3)) {
+    if (!BACKPORTSZSTD__PyArg_CheckPositional("_train_dict", nargs, 3, 3)) {
         goto exit;
     }
     if (!PyBytes_Check(args[0])) {
-        _backportszstdredef__PyArg_BadArgument("_train_dict", "argument 1", "bytes", args[0]);
+        BACKPORTSZSTD__PyArg_BadArgument("_train_dict", "argument 1", "bytes", args[0]);
         goto exit;
     }
     samples_bytes = (PyBytesObject *)args[0];
     if (!PyTuple_Check(args[1])) {
-        _backportszstdredef__PyArg_BadArgument("_train_dict", "argument 2", "tuple", args[1]);
+        BACKPORTSZSTD__PyArg_BadArgument("_train_dict", "argument 2", "tuple", args[1]);
         goto exit;
     }
     samples_sizes = args[1];
     {
         Py_ssize_t ival = -1;
-        PyObject *iobj = _backportszstdredef__PyNumber_Index(args[2]);
+        PyObject *iobj = BACKPORTSZSTD__PyNumber_Index(args[2]);
         if (iobj != NULL) {
             ival = PyLong_AsSsize_t(iobj);
             Py_DECREF(iobj);
@@ -100,27 +100,27 @@ _zstd__finalize_dict(PyObject *module, PyObject *const *args, Py_ssize_t nargs)
     Py_ssize_t dict_size;
     int compression_level;
 
-    if (!_backportszstdredef__PyArg_CheckPositional("_finalize_dict", nargs, 5, 5)) {
+    if (!BACKPORTSZSTD__PyArg_CheckPositional("_finalize_dict", nargs, 5, 5)) {
         goto exit;
     }
     if (!PyBytes_Check(args[0])) {
-        _backportszstdredef__PyArg_BadArgument("_finalize_dict", "argument 1", "bytes", args[0]);
+        BACKPORTSZSTD__PyArg_BadArgument("_finalize_dict", "argument 1", "bytes", args[0]);
         goto exit;
     }
     custom_dict_bytes = (PyBytesObject *)args[0];
     if (!PyBytes_Check(args[1])) {
-        _backportszstdredef__PyArg_BadArgument("_finalize_dict", "argument 2", "bytes", args[1]);
+        BACKPORTSZSTD__PyArg_BadArgument("_finalize_dict", "argument 2", "bytes", args[1]);
         goto exit;
     }
     samples_bytes = (PyBytesObject *)args[1];
     if (!PyTuple_Check(args[2])) {
-        _backportszstdredef__PyArg_BadArgument("_finalize_dict", "argument 3", "tuple", args[2]);
+        BACKPORTSZSTD__PyArg_BadArgument("_finalize_dict", "argument 3", "tuple", args[2]);
         goto exit;
     }
     samples_sizes = args[2];
     {
         Py_ssize_t ival = -1;
-        PyObject *iobj = _backportszstdredef__PyNumber_Index(args[3]);
+        PyObject *iobj = BACKPORTSZSTD__PyNumber_Index(args[3]);
         if (iobj != NULL) {
             ival = PyLong_AsSsize_t(iobj);
             Py_DECREF(iobj);
@@ -193,7 +193,7 @@ _zstd__get_param_bounds(PyObject *module, PyObject *const *args, Py_ssize_t narg
     int parameter;
     int is_compress;
 
-    args = _backportszstdredef__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+    args = BACKPORTSZSTD__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 2, /*maxpos*/ 2, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
     if (!args) {
         goto exit;
@@ -264,7 +264,7 @@ _zstd_get_frame_size(PyObject *module, PyObject *const *args, Py_ssize_t nargs, 
     PyObject *argsbuf[1];
     Py_buffer frame_buffer = {NULL, NULL};
 
-    args = _backportszstdredef__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+    args = BACKPORTSZSTD__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 1, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
     if (!args) {
         goto exit;
@@ -332,7 +332,7 @@ _zstd__get_frame_info(PyObject *module, PyObject *const *args, Py_ssize_t nargs,
     PyObject *argsbuf[1];
     Py_buffer frame_buffer = {NULL, NULL};
 
-    args = _backportszstdredef__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+    args = BACKPORTSZSTD__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 1, /*maxpos*/ 1, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
     if (!args) {
         goto exit;
@@ -404,18 +404,18 @@ _zstd__set_parameter_types(PyObject *module, PyObject *const *args, Py_ssize_t n
     PyObject *c_parameter_type;
     PyObject *d_parameter_type;
 
-    args = _backportszstdredef__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
+    args = BACKPORTSZSTD__PyArg_UnpackKeywords(args, nargs, NULL, kwnames, &_parser,
             /*minpos*/ 2, /*maxpos*/ 2, /*minkw*/ 0, /*varpos*/ 0, argsbuf);
     if (!args) {
         goto exit;
     }
     if (!PyObject_TypeCheck(args[0], &PyType_Type)) {
-        _backportszstdredef__PyArg_BadArgument("_set_parameter_types", "argument 'c_parameter_type'", (&PyType_Type)->tp_name, args[0]);
+        BACKPORTSZSTD__PyArg_BadArgument("_set_parameter_types", "argument 'c_parameter_type'", (&PyType_Type)->tp_name, args[0]);
         goto exit;
     }
     c_parameter_type = args[0];
     if (!PyObject_TypeCheck(args[1], &PyType_Type)) {
-        _backportszstdredef__PyArg_BadArgument("_set_parameter_types", "argument 'd_parameter_type'", (&PyType_Type)->tp_name, args[1]);
+        BACKPORTSZSTD__PyArg_BadArgument("_set_parameter_types", "argument 'd_parameter_type'", (&PyType_Type)->tp_name, args[1]);
         goto exit;
     }
     d_parameter_type = args[1];

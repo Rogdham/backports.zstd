@@ -1,5 +1,5 @@
-#ifndef BACKPORTS_ZSTD_REDEF_ORIG_H
-#define BACKPORTS_ZSTD_REDEF_ORIG_H
+#ifndef BACKPORTS_ZSTD_EDITS_ORIG_H
+#define BACKPORTS_ZSTD_EDITS_ORIG_H
 
 #if PY_VERSION_HEX < 0x030D0000 // Python 3.12 and below
 
@@ -40,4 +40,4 @@ PyAPI_FUNC(PyObject *) _PyNumber_Index(PyObject *o);
 
 #endif
 
-#endif /* !BACKPORTS_ZSTD_REDEF_ORIG_H */
+#endif /* !BACKPORTS_ZSTD_EDITS_ORIG_H */
