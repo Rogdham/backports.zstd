@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+### :boom: Breaking changes
+
+- Update code with CPython 3.14.0 beta 2 version
+
 ### :rocket: Added
 
 - Support for CPython 3.10, 3.11 and 3.12
