@@ -4,6 +4,19 @@ from pathlib import Path
 import sysconfig
 
 
+# create a LICENSE_zstd.txt file
+# wheels distributions needs to ship the license of the zstd library
+ROOT_PATH = Path(__file__).parent.absolute()
+with (ROOT_PATH / "LICENSE_zstd.txt").open("w") as f:
+    f.write(
+        "Depending on how it is build, this package may distribute the zstd library,\n"
+        "partially or in its integrality, in source or binary form.\n\n"
+        "Its license is reproduced below.\n\n"
+        "---\n\n"
+    )
+    f.write((ROOT_PATH / "src" / "c" / "zstd" / "LICENSE").read_text())
+
+
 UnixCCompiler.src_extensions.append(".S")
 
 _PLATFORM_IS_WIN = sysconfig.get_platform().startswith("win")

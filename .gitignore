@@ -7,3 +7,5 @@ __pycache__
 *.egg-info
 *.o
 *.so
+
+/LICENSE_zstd.txt
