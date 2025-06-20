@@ -45,6 +45,12 @@ BACKPORTSZSTD__PyArg_UnpackKeywords(
 #define BACKPORTSZSTD__PyNumber_Index(o) \
     _PyNumber_Index(o)
 
+#if PY_VERSION_HEX < 0x030D0000 // Python 3.12 and below
+#define BACKPORTSZSTD_PyErr_Format_AppendPT(t, s, o) PyErr_Format(t, (s "%s"), Py_TYPE(o)->tp_name)
+#else
+#define BACKPORTSZSTD_PyErr_Format_AppendPT(t, s, o) PyErr_Format(t, (s "%T"), o)
+#endif
+
 /*
 Backporting PyMutex is a lot of work
 Instead, we fallback on PyThread_type_lock for Python 3.12 and below
