@@ -158,7 +158,7 @@ jobs:
             file_pattern: "*.tar.gz"
           - kind: wheel
             artifact_name: "wheels Linux regular manylinux"
-            file_pattern: "*-cp313-cp313-manylinux_2_17_x86_64*.whl"
+            file_pattern: "*-cp313-cp313-manylinux*x86_64*.whl"
     steps:
       - uses: actions/checkout@v4
         with:
