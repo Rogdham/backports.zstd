@@ -1,7 +1,6 @@
 import io
 from os import PathLike
-from backports.zstd._zstd import (ZstdCompressor, ZstdDecompressor, ZstdError,
-                                  ZSTD_DStreamOutSize)
+from backports.zstd._zstd import ZstdCompressor, ZstdDecompressor, ZSTD_DStreamOutSize
 from backports.zstd import _streams
 
 __all__ = ('ZstdFile', 'open')

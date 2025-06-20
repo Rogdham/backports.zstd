@@ -265,6 +265,7 @@ class ZstdCompressor:
     def flush(
         self, /, mode: _ZstdCompressorFlushBlock | _ZstdCompressorFlushFrame = 2
     ) -> bytes: ...
+    def set_pledged_input_size(self, size: int | None, /) -> None: ...
     @property
     def last_mode(
         self,
