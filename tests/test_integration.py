@@ -1,17 +1,25 @@
 import sys
-import unittest
-from io import BytesIO
-from secrets import token_bytes, token_urlsafe
 
 if sys.version_info < (3, 14):
     from backports import zstd
+
+    zstd.patch_tarfile()
+
 else:
     from compression import zstd
+
+import unittest
+from io import BytesIO
+from secrets import token_bytes, token_urlsafe
+import tarfile
+from tempfile import TemporaryDirectory
+from pathlib import Path
 
 if sys.version_info < (3, 11):
     assert_type = lambda *_: None
 else:
     from typing import assert_type
+
 
 # these tests are simple checks for main use cases
 # to make sure they work with the conditional import in 3.14 as well
@@ -78,6 +86,21 @@ class TestCompat(unittest.TestCase):
             assert_type(data, str)
             self.assertEqual(data, raw)
         self.assertTrue(fobj.tell() > 0)
+
+    def test_tarfile(self) -> None:
+        raw = token_bytes(1_000)
+        raw_name = token_urlsafe(10)
+        with TemporaryDirectory() as tmpfile:
+            path = Path(tmpfile) / "archive.tar.zst"
+            with tarfile.open(path, "w:zst") as tf:  # type: ignore[call-overload]
+                ti = tarfile.TarInfo(raw_name)
+                ti.size = len(raw)
+                tf.addfile(ti, BytesIO(raw))
+
+            with tarfile.open(path) as tf:
+                self.assertEqual(tf.getnames(), [raw_name])
+                with tf.extractfile(raw_name) as fobj:  # type: ignore[union-attr]
+                    self.assertEqual(fobj.read(), raw)
 
 
 if __name__ == "__main__":

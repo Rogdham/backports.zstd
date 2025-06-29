@@ -13,6 +13,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ### :rocket: Added
 
+- Support in `tarfile` module via patching
 - Support for CPython 3.9
 
 ## [0.2.0] - 2025-06-08

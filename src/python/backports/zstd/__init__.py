@@ -24,6 +24,9 @@ __all__ = (
     'ZstdDecompressor',
     'ZstdDict',
     'ZstdError',
+
+    # backports.zstd specifics
+    "patch_tarfile",
 )
 
 import backports.zstd._zstd as _zstd
@@ -31,6 +34,7 @@ import enum
 from backports.zstd._zstd import (ZstdCompressor, ZstdDecompressor, ZstdDict, ZstdError,
                                   get_frame_size, zstd_version)
 from backports.zstd._zstdfile import ZstdFile, open, _nbytes
+from backports.zstd._tarfile import patch_tarfile
 
 # zstd_version_number is (MAJOR * 100 * 100 + MINOR * 100 + RELEASE)
 zstd_version_info = (*divmod(_zstd.zstd_version_number // 100, 100),
