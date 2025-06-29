@@ -42,8 +42,14 @@ BACKPORTSZSTD__PyArg_UnpackKeywords(
         buf);
 }
 
-#define BACKPORTSZSTD__PyNumber_Index(o) \
-    _PyNumber_Index(o)
+/*
+The implementation of PyNumber_Index in 3.9 is the same as _PyNumber_Index in 3.10
+*/
+#if PY_VERSION_HEX < 0x030A0000 // Python 3.9 and below
+#define BACKPORTSZSTD__PyNumber_Index(o) PyNumber_Index(o)
+#else
+#define BACKPORTSZSTD__PyNumber_Index(o) _PyNumber_Index(o)
+#endif
 
 #if PY_VERSION_HEX < 0x030D0000 // Python 3.12 and below
 #define BACKPORTSZSTD_PyErr_Format_AppendPT(t, s, o) PyErr_Format(t, (s "%s"), Py_TYPE(o)->tp_name)

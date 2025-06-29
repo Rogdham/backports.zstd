@@ -28,4 +28,10 @@ static inline int PyType_Freeze(PyTypeObject *type)
 #define _PyCFunction_CAST(func) _Py_CAST(PyCFunction, _Py_CAST(void (*)(void), (func)))
 #endif
 
+#if PY_VERSION_HEX < 0x030A0000 // Python 3.9 and below
+// this will not mark objects as immutable
+// but it is acceptable in the scope of this library
+#define Py_TPFLAGS_IMMUTABLETYPE 0
+#endif
+
 #endif /* !BACKPORTS_ZSTD_COMPAT_H */

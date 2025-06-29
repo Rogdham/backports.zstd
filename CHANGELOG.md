@@ -11,6 +11,10 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 - Update code with CPython 3.14.0 beta 3 version
 
+### :rocket: Added
+
+- Support for CPython 3.9
+
 ## [0.2.0] - 2025-06-08
 
 [0.2.0]: https://github.com/rogdham/backports.zstd/releases/tag/v0.2.0

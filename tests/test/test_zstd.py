@@ -6,6 +6,7 @@ import random
 import re
 import os
 import unittest
+import sys
 import tempfile
 import threading
 
@@ -1414,8 +1415,9 @@ class ZstdDictTestCase(unittest.TestCase):
             _zstd.finalize_dict(TRAINED_DICT.dict_content, b'', [], 100, 5)
         with self.assertRaises(TypeError):
             _zstd.finalize_dict(TRAINED_DICT.dict_content, b'', (), 100.1, 5)
-        with self.assertRaises(TypeError):
-            _zstd.finalize_dict(TRAINED_DICT.dict_content, b'', (), 100, 5.1)
+        if sys.version_info >= (3, 10):  # emits a warning instead of failing in 3.9
+            with self.assertRaises(TypeError):
+                _zstd.finalize_dict(TRAINED_DICT.dict_content, b'', (), 100, 5.1)
 
         with self.assertRaises(ValueError):
             _zstd.finalize_dict(TRAINED_DICT.dict_content, b'abc', (4, -1), 100, 5)
