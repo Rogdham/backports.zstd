@@ -781,9 +781,13 @@ class MiscReadTestBase(CommonReadTest):
                 path = os.path.join(DIR, tarinfo.name)
                 if sys.platform != "win32":
                     # Win32 has no support for fine grained permissions.
-                    self.assertEqual(tarinfo.mode & 0o777,
-                                     os.stat(path).st_mode & 0o777,
-                                     tarinfo.name)
+                    if sys.version_info >= (3, 10):
+                        self.assertEqual(tarinfo.mode & 0o777,
+                                        os.stat(path).st_mode & 0o777,
+                                        tarinfo.name)
+                    else:
+                        self.assertEqual(tarinfo.mode & 0o777,
+                                        os.stat(path).st_mode & 0o777)
                 def format_mtime(mtime):
                     if isinstance(mtime, float):
                         return "{} ({})".format(mtime, mtime.hex())
@@ -1697,10 +1701,18 @@ class WriteTest(WriteTestBase, unittest.TestCase):
                 f.write('something\n')
             os.symlink(source_file, target_file)
             with tarfile.open(temparchive, 'w') as tar:
-                tar.add(source_file, arcname="source")
-                tar.add(target_file, arcname="symlink")
+                if sys.version_info >= (3, 10):
+                    tar.add(source_file, arcname="source")
+                    tar.add(target_file, arcname="symlink")
+                else:
+                    tar.add(source_file)
+                    tar.add(target_file)
             # Let's extract it to the location which contains the symlink
-            with tarfile.open(temparchive, errorlevel=2) as tar:
+            if sys.version_info >= (3, 10):
+                cm = tarfile.open(temparchive, errorlevel=2)
+            else:
+                cm = tarfile.open(temparchive)
+            with cm as tar:
                 # this should not raise OSError: [Errno 17] File exists
                 try:
                     if sys.version_info >= (3, 12):
@@ -1844,6 +1856,7 @@ class StreamWriteTest(WriteTestBase, unittest.TestCase):
 
 
 class GzipStreamWriteTest(GzipTest, StreamWriteTest):
+    @unittest.skipIf(sys.version_info < (3, 10), "Requires Python 3.10")
     def test_source_directory_not_leaked(self):
         """
         Ensure the source directory is not included in the tar header
@@ -2159,6 +2172,7 @@ class CreateTest(WriteTestBase, unittest.TestCase):
 
 class GzipCreateTest(GzipTest, CreateTest):
 
+    @unittest.skipIf(sys.version_info < (3, 10), "Requires Python 3.10")
     def test_create_with_compresslevel(self):
         with tarfile.open(tmpname, self.mode, compresslevel=1) as tobj:
             tobj.add(self.file_path)
@@ -2168,6 +2182,7 @@ class GzipCreateTest(GzipTest, CreateTest):
 
 class Bz2CreateTest(Bz2Test, CreateTest):
 
+    @unittest.skipIf(sys.version_info < (3, 10), "Requires Python 3.10")
     def test_create_with_compresslevel(self):
         with tarfile.open(tmpname, self.mode, compresslevel=1) as tobj:
             tobj.add(self.file_path)
@@ -2179,6 +2194,7 @@ class LzmaCreateTest(LzmaTest, CreateTest):
 
     # Unlike gz and bz2, xz uses the preset keyword instead of compresslevel.
     # It does not allow for preset to be specified when reading.
+    @unittest.skipIf(sys.version_info < (3, 10), "Requires Python 3.10")
     def test_create_with_preset(self):
         with tarfile.open(tmpname, self.mode, preset=1) as tobj:
             tobj.add(self.file_path)
@@ -2188,6 +2204,7 @@ class ZstdCreateTest(ZstdTest, CreateTest):
 
     # Unlike gz and bz2, zstd uses the level keyword instead of compresslevel.
     # It does not allow for level to be specified when reading.
+    @unittest.skipIf(sys.version_info < (3, 10), "Requires Python 3.10")
     def test_create_with_level(self):
         with tarfile.open(tmpname, self.mode, level=1) as tobj:
             tobj.add(self.file_path)
@@ -2824,6 +2841,7 @@ class MiscTest(unittest.TestCase):
         support.check__all__(self, tarfile, not_exported=not_exported,
                              name_of_module=('tarfile', 'backports.zstd._tarfile'))
 
+    @unittest.skipIf(sys.version_info < (3, 10), "Requires Python 3.10")
     def test_useful_error_message_when_modules_missing(self):
         fname = os.path.join(os.path.dirname(__file__), 'archivetestdata', 'testtar.tar.xz')
         with self.assertRaises(tarfile.ReadError) as excinfo:
