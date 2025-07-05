@@ -14,6 +14,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 ### :rocket: Added
 
 - Support for CPython 3.9
+- Support for CPython 3.13 free-threaded
 
 ## [0.2.0] - 2025-06-08
 
