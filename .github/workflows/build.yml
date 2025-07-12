@@ -53,7 +53,7 @@ jobs:
       - name: Install sdist
         run: python -m pip install dist/*.tar.gz
       - name: Test
-        run: python -m unittest discover tests
+        run: python -m unittest discover tests -v
 
   define_build_wheels_matrix:
     name: Define build wheels matrix
@@ -116,7 +116,7 @@ jobs:
       CIBW_ARCHS: ${{ matrix.archs }}
       CIBW_BUILD: ${{ matrix.build }}
       CIBW_ENABLE: cpython-freethreading
-      CIBW_TEST_COMMAND: python -m unittest discover {project}/tests
+      CIBW_TEST_COMMAND: python -m unittest discover {project}/tests -v
     steps:
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -143,6 +143,40 @@ jobs:
         with:
           name: wheels ${{ matrix.name }}
           path: dist/*.whl
+
+  test_specific_python_versions:
+    name: Test on Python version | ${{ matrix.version }}
+    runs-on: ubuntu-latest
+    container: docker.io/library/python:${{ matrix.version }}-slim
+    needs:
+      - build_wheels
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - version: "3.9.0"
+            file_pattern: "*-cp39-cp39-manylinux*x86_64*.whl"
+          - version: "3.10.0"
+            file_pattern: "*-cp310-cp310-manylinux*x86_64*.whl"
+          - version: "3.11.0"
+            file_pattern: "*-cp311-cp311-manylinux*x86_64*.whl"
+          - version: "3.12.0"
+            file_pattern: "*-cp312-cp312-manylinux*x86_64*.whl"
+          - version: "3.13.0"
+            file_pattern: "*-cp313-cp313-manylinux*x86_64*.whl"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels Linux regular manylinux
+          path: dist
+      - name: Python version
+        run: python -VV
+      - name: Install package
+        run: python -m pip install dist/${{ matrix.file_pattern }}
+      - name: Test
+        run: python -m unittest discover tests -v
 
   test_typing:
     name: Test typing | ${{ matrix.kind }}
@@ -189,8 +223,8 @@ jobs:
     needs:
       - build_sdist
       - build_wheels
-      - define_build_wheels_matrix
       - test_integration
+      - test_specific_python_versions
       - test_typing
     environment: publish
     permissions:
