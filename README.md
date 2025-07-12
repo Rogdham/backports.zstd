@@ -36,17 +36,49 @@ backports.zstd ; python_version<'3.14'
 
 ## Usage
 
-Use the following conditional import:
+When importing a module needing Zstandard support, use a conditional import based on the
+version of Python. See below for examples.
+
+### zstd
 
 ```python
 import sys
 
-if sys.version_info < (3, 14):
-    from backports import zstd
-else:
+if sys.version_info >= (3, 14):
     from compression import zstd
+else:
+    from backports import zstd
+
+
+# use the zstd module, for example:
+zstd.compress(b"Hello, world!")
 ```
 
-Refer to the [official Python documentation][python-doc] for usage of the module.
+Refer to the [official Python documentation][doc-zstd] for usage of the module.
 
-[python-doc]: https://docs.python.org/3.14/library/compression.zstd.html
+[doc-zstd]: https://docs.python.org/3.14/library/compression.zstd.html
+
+### tarfile
+
+```python
+import sys
+
+if sys.version_info >= (3, 14):
+    import tarfile
+else:
+    from backports.zstd import tarfile
+
+
+# use the tarfile module, for example:
+with tarfile.open('archive.tar.zst') as tar:
+    tar.list()
+```
+
+This `tarfile` modules is backported from Python 3.14 and includes Zstandard-specific
+features such as: explicit modes for opening files (e.g. `r:zstd`), specific arguments
+(e.g. `zstd_dict`)… refer to the [official Python documentation][doc-tarfile] for more
+info.
+
+[doc-tarfile]: https://docs.python.org/3.14/library/tarfile.html
+
+Moreover, the CLI is available as well: `python -m backports.zstd.tarfile`.
