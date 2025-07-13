@@ -8,9 +8,10 @@ from tempfile import TemporaryDirectory
 if sys.version_info >= (3, 14):
     from compression import zstd
     import tarfile
+    import zipfile
 else:
     from backports import zstd
-    from backports.zstd import tarfile
+    from backports.zstd import tarfile, zipfile
 
 if sys.version_info >= (3, 11):
     from typing import assert_type
@@ -99,6 +100,18 @@ class TestCompat(unittest.TestCase):
                 assert extracted is not None  # for type checkers
                 with extracted as fobj:
                     self.assertEqual(fobj.read(), raw)
+
+    def test_zipfile(self) -> None:
+        raw = token_bytes(1_000)
+        raw_name = token_urlsafe(10)
+        with TemporaryDirectory() as tmpfile:
+            path = Path(tmpfile) / "archive.zip"
+            with zipfile.ZipFile(path, "w") as zf:
+                zf.writestr(raw_name, raw, zipfile.ZIP_ZSTANDARD)
+
+            with zipfile.ZipFile(path) as zf:
+                self.assertEqual(zf.namelist(), [raw_name])
+                self.assertEqual(zf.read(raw_name), raw)
 
 
 if __name__ == "__main__":

@@ -70,7 +70,7 @@ else:
 
 
 # use the tarfile module, for example:
-with tarfile.open('archive.tar.zst') as tar:
+with tarfile.open("archive.tar.zst") as tar:
     tar.list()
 ```
 
@@ -82,3 +82,27 @@ info.
 [doc-tarfile]: https://docs.python.org/3.14/library/tarfile.html
 
 Moreover, the CLI is available as well: `python -m backports.zstd.tarfile`.
+
+### zipfile
+
+```python
+import sys
+
+if sys.version_info >= (3, 14):
+    import zipfile
+else:
+    from backports.zstd import zipfile
+
+
+# use the zipfile module, for example:
+with zipfile.ZipFile("archive.zip", "w") as zf:
+    zf.writestr("hello.txt", "Hi!", zipfile.ZIP_ZSTANDARD)
+```
+
+This `zipfile` modules is backported from Python 3.14 and includes Zstandard-specific
+features such as the constant `ZIP_ZSTANDARD` to be used for `compress_type`… refer to
+the [official Python documentation][doc-zipfile] for more info.
+
+[doc-zipfile]: https://docs.python.org/3.14/library/zipfile.html
+
+Moreover, the CLI is available as well: `python -m backports.zstd.zipfile`.

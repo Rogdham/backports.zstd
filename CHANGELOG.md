@@ -14,6 +14,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 ### :rocket: Added
 
 - Backport `tarfile` module
+- Backport `zipfile` module
 - Support for CPython 3.9
 - Support for CPython 3.13 free-threaded
 
