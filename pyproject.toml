@@ -1,6 +1,6 @@
 [project]
 name = "backports.zstd"
-version = "0.2.0"
+version = "0.3.0"
 authors = [{ name = "Rogdham", email = "contact@rogdham.net" }]
 description = "Backport of compression.zstd"
 readme = { file = "README.md", content-type = "text/markdown" }
@@ -8,7 +8,7 @@ keywords = ["backport", "backports", "pep-784", "zstd"]
 license = "PSF-2.0"
 license-files = ["LICENSE.txt", "LICENSE_zstd.txt"]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Topic :: System :: Archiving :: Compression",
     "Programming Language :: Python",
