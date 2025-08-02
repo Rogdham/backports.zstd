@@ -97,3 +97,26 @@ the [official Python documentation][doc-zipfile] for more info.
 [doc-zipfile]: https://docs.python.org/3.14/library/zipfile.html
 
 Moreover, the CLI is available as well: `python -m backports.zstd.zipfile`.
+
+### shutil
+
+```python
+import shutil
+import sys
+
+if sys.version_info < (3, 14):
+    from backports.zstd import register_shutil
+    register_shutil()
+
+# use the shutil module, for example
+shutil.unpack_archive('archive.tar.zst')
+```
+
+Calling the `register_shutil` function allows to create zstd'ed tar files using the
+`"zstdtar"` format, as well as unpack them.
+
+It also overrides support for unpacking zip files, enabling the unpacking of zip
+archives that use Zstandard for compression.
+
+Alternatively, call `register_shutil(tar=False)` or `register_shutil(zip=False)` to
+choose which archiving support to register.

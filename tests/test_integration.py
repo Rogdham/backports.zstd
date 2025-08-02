@@ -1,3 +1,4 @@
+import shutil
 import sys
 import unittest
 from io import BytesIO
@@ -11,7 +12,8 @@ if sys.version_info >= (3, 14):
     import zipfile
 else:
     from backports import zstd
-    from backports.zstd import tarfile, zipfile
+    from backports.zstd import register_shutil, tarfile, zipfile
+    register_shutil()
 
 if sys.version_info >= (3, 11):
     from typing import assert_type
@@ -101,6 +103,9 @@ class TestCompat(unittest.TestCase):
                 with extracted as fobj:
                     self.assertEqual(fobj.read(), raw)
 
+            shutil.unpack_archive(path, tmpfile)
+            self.assertEqual((Path(tmpfile) / raw_name).read_bytes(), raw)
+
     def test_zipfile(self) -> None:
         raw = token_bytes(1_000)
         raw_name = token_urlsafe(10)
@@ -112,6 +117,23 @@ class TestCompat(unittest.TestCase):
             with zipfile.ZipFile(path) as zf:
                 self.assertEqual(zf.namelist(), [raw_name])
                 self.assertEqual(zf.read(raw_name), raw)
+
+            shutil.unpack_archive(path, tmpfile)
+            self.assertEqual((Path(tmpfile) / raw_name).read_bytes(), raw)
+
+    def test_shutil_make_archive(self) -> None:
+        raw = token_bytes(1_000)
+        raw_name = token_urlsafe(10)
+        with TemporaryDirectory() as tmpfile:
+            path_src = Path(tmpfile) / "src"
+            path_src.mkdir()
+            (path_src / raw_name).write_bytes(raw)
+
+            path_dst = Path(tmpfile) / "archive"
+            shutil.make_archive(path_dst.as_posix(), "zstdtar", path_src)
+
+            with path_dst.with_suffix(".tar.zst").open("rb") as f:
+                self.assertEqual(f.read(4), bytes.fromhex("28 b5 2f fd"))
 
 
 if __name__ == "__main__":
