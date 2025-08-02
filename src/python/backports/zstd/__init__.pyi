@@ -40,6 +40,8 @@ __all__ = (
     "get_frame_info",
     "Strategy",
     "train_dict",
+    # backports.zstd._shutil
+    "register_shutil",
     # backports.zstd._zstdfile
     "open",
     "ZstdFile",
@@ -121,6 +123,12 @@ class Strategy(enum.IntEnum):
     btopt = ...
     btultra = ...
     btultra2 = ...
+
+#
+# _shutil
+#
+
+def register_shutil(*, tar: bool = True, zip: bool = True) -> None: ...
 
 #
 # _zstdfile

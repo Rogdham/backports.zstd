@@ -12,6 +12,9 @@ __all__ = (
     'Strategy',
     'train_dict',
 
+    # backports.zstd._shutil
+    'register_shutil',
+
     # backports.zstd._zstdfile
     'open',
     'ZstdFile',
@@ -28,6 +31,7 @@ __all__ = (
 
 import backports.zstd._zstd as _zstd
 import enum
+from backports.zstd._shutil import register_shutil
 from backports.zstd._zstd import (ZstdCompressor, ZstdDecompressor, ZstdDict, ZstdError,
                                   get_frame_size, zstd_version)
 from backports.zstd._zstdfile import ZstdFile, open, _nbytes

@@ -11,6 +11,10 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 - Update code with CPython 3.14.0 release candidate 1 version
 
+### :rocket: Added
+
+- Integration into `shutil` module
+
 ## [0.3.0] - 2025-07-17
 
 [0.3.0]: https://github.com/rogdham/backports.zstd/releases/tag/v0.2.0
