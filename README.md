@@ -25,6 +25,8 @@ Add the following dependency to your project:
 backports.zstd ; python_version<'3.14'
 ```
 
+…or just run `pip install backports.zstd`.
+
 ## Usage
 
 When importing a module needing Zstandard support, use a conditional import based on the
@@ -120,3 +122,64 @@ archives that use Zstandard for compression.
 
 Alternatively, call `register_shutil(tar=False)` or `register_shutil(zip=False)` to
 choose which archiving support to register.
+
+## FAQ
+
+### Who are you?
+
+This project is created and maintained by [Rogdham](https://github.com/rogdham)
+(maintainer of [`pyzstd`](https://github.com/rogdham/pyzstd), who helped with [PEP-784]
+and integration of Zstandard into the standard library), with help from
+[Emma Smith](https://github.com/emmatyping) (author of [PEP-784], who did most of the
+work of porting `pyzstd` into the standard library).
+
+### How is this backport constructed?
+
+The aim is to be as close as possible to the upstream code of
+[CPython](https://github.com/python/cpython).
+
+The runtime code comes from CPython 3.14, with minor changes to support older versions
+of Python.
+
+During the build phase, the project uses [`zstd`](https://github.com/facebook/zstd)
+(canonical implementation of Zstandard) as well as
+[`pythoncapi-compat`](https://github.com/python/pythoncapi-compat) (which handles some
+of the compatibility with older Python versions).
+
+Tests come from CPython 3.14, with minor changes to support older versions of Python.
+Additional tests have been written specifically for `backports.zstd`.
+
+The type hints for the standard library have been contributed to
+[`typeshed`](https://github.com/python/typeshed) and also backported to
+`backports.zstd`.
+
+### Why can this library not be installed with Python 3.14?
+
+This is on purpose. For Python 3.14 and later, use the `compression.zstd` module from
+the standard library.
+
+If you want your code to be compatible with multiple Python versions, condition the
+usage of this library based on the Python version:
+
+- [During install](#install);
+- [When importing at runtime](#usage).
+
+### What is the status of `backports.zstd`?
+
+The code currently comes from CPython 3.14.0rc1. As a result, changes may appear
+upstream as we get closer to the final 3.14.0 release. We plan on releasing version
+1.0.0 of `backports.zstd` together with release 3.14.0 of CPython.
+
+However, this library can be used without waiting. At this point, `backports.zstd` is
+considered feature-complete, with support for CPython 3.9 to 3.13 (including
+free-threading support for 3.13). Support for PyPy is not yet available. See
+[our roadmap](https://github.com/Rogdham/backports.zstd/issues/2) for more information.
+
+### I found a bug
+
+If you encounter any issues, please open a
+[GitHub issue](https://github.com/Rogdham/backports.zstd/issues/new) with a minimal
+reproducible example.
+
+We will check if the issue is with `backports.zstd` or CPython. We have already reported
+and fixed a few issues in CPython this way!
