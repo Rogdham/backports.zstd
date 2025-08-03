@@ -62,7 +62,7 @@ jobs:
       matrix: ${{ steps.define.outputs.matrix }}
       full: ${{ steps.define.outputs.full }}
     env:
-      PYTHON_VERSIONS: cp39 cp310 cp311 cp312 cp313 cp313t
+      PYTHON_VERSIONS: cp39 cp310 cp311 cp312 cp313 cp313t pp310 pp311
       FULL:
         ${{ ( startsWith(github.ref, 'refs/tags') || startsWith(github.head_ref,
         'release-') || github.event_name == 'workflow_dispatch' ) && '1' || '0' }}
@@ -84,7 +84,7 @@ jobs:
 
 
           for identifier in ("manylinux", "musllinux"):
-              build = " ".join(f"{py}-{identifier}_*" for py in PYTHON_VERSIONS)
+              build = " ".join(f"{py}-{identifier}_*" for py in PYTHON_VERSIONS if identifier=="manylinux" or py.startswith("cp"))
               add(f"Linux regular {identifier}", "ubuntu-latest", "x86_64 i686", build)
               if FULL:
                   for arch in ("aarch64", "ppc64le", "s390x"):
@@ -115,7 +115,7 @@ jobs:
     env:
       CIBW_ARCHS: ${{ matrix.archs }}
       CIBW_BUILD: ${{ matrix.build }}
-      CIBW_ENABLE: cpython-freethreading
+      CIBW_ENABLE: cpython-freethreading pypy
       CIBW_TEST_COMMAND: python -m unittest discover {project}/tests -v
     steps:
       - name: Setup Python

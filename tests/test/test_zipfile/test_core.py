@@ -316,6 +316,7 @@ class AbstractTestsWithSourceFile:
         zipfp.writestr("b.txt", "hello world", compress_type=self.compression)
         info = zipfp.getinfo('b.txt')
         self.assertEqual(info.compress_type, self.compression)
+        zipfp.close()  # gh-137589
 
     def test_writestr_compresslevel(self):
         zipfp = zipfile.ZipFile(TESTFN2, "w", compresslevel=1)
@@ -332,6 +333,8 @@ class AbstractTestsWithSourceFile:
         b_info = zipfp.getinfo('b.txt')
         self.assertEqual(b_info.compress_type, self.compression)
         self.assertEqual(b_info._compresslevel, 2)
+
+        zipfp.close()  # gh-137589
 
     def test_read_return_size(self):
         # Issue #9837: ZipExtFile.read() shouldn't return more bytes
@@ -2268,6 +2271,7 @@ class OtherTests(unittest.TestCase):
             zipf = zipfile.ZipFile(TESTFN, mode="r")
         except zipfile.BadZipFile:
             self.fail("Unable to create empty ZIP file in 'w' mode")
+        zipf.close()  # gh-137589
 
         zipf = zipfile.ZipFile(TESTFN, mode="a")
         zipf.close()
@@ -2275,6 +2279,7 @@ class OtherTests(unittest.TestCase):
             zipf = zipfile.ZipFile(TESTFN, mode="r")
         except:
             self.fail("Unable to create empty ZIP file in 'a' mode")
+        zipf.close()  # gh-137589
 
     def test_open_empty_file(self):
         # Issue 1710703: Check that opening a file with less than 22 bytes

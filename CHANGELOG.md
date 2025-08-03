@@ -13,6 +13,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ### :rocket: Added
 
+- Support for PyPy: Python 3.10 and 3.11
 - Update type hints with typeshed `554701e9b`
 
 ## [0.4.0] - 2025-08-03
