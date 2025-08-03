@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project
 adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## [0.4.0] - 2025-08-03
+
+[0.4.0]: https://github.com/rogdham/backports.zstd/releases/tag/v0.4.0
 
 ### :boom: Breaking changes
 
@@ -13,11 +15,11 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ### :rocket: Added
 
-- Integration into `shutil` module
+- Integration with the `shutil` module
 
 ## [0.3.0] - 2025-07-17
 
-[0.3.0]: https://github.com/rogdham/backports.zstd/releases/tag/v0.2.0
+[0.3.0]: https://github.com/rogdham/backports.zstd/releases/tag/v0.3.0
 
 ### :boom: Breaking changes
 
