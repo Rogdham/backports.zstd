@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### :rocket: Added
+
+- Support for PyPy: Python 3.10 and 3.11
+
 ## [0.4.0] - 2025-08-03
 
 [0.4.0]: https://github.com/rogdham/backports.zstd/releases/tag/v0.4.0
