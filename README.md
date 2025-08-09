@@ -139,7 +139,7 @@ The aim is to be as close as possible to the upstream code of
 [CPython](https://github.com/python/cpython).
 
 The runtime code comes from CPython 3.14, with minor changes to support older versions
-of Python.
+of Python. For PyPy users, the C code has been ported to CFFI.
 
 During the build phase, the project uses [`zstd`](https://github.com/facebook/zstd)
 (canonical implementation of Zstandard) as well as
@@ -172,8 +172,7 @@ upstream as we get closer to the final 3.14.0 release. We plan on releasing vers
 
 However, this library can be used without waiting. At this point, `backports.zstd` is
 considered feature-complete, with support for CPython 3.9 to 3.13 (including
-free-threading support for 3.13). Support for PyPy is not yet available. See
-[our roadmap](https://github.com/Rogdham/backports.zstd/issues/2) for more information.
+free-threading support for 3.13).
 
 ### I found a bug
 
