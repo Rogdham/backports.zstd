@@ -11,6 +11,10 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 - Update code with CPython 3.14.0 release candidate 2 version
 
+### :rocket: Added
+
+- Update type hints with typeshed `554701e9b`
+
 ## [0.4.0] - 2025-08-03
 
 [0.4.0]: https://github.com/rogdham/backports.zstd/releases/tag/v0.4.0
