@@ -166,7 +166,7 @@ usage of this library based on the Python version:
 
 ### What is the status of `backports.zstd`?
 
-The code currently comes from CPython 3.14.0rc1. As a result, changes may appear
+The code currently comes from CPython 3.14.0rc2. As a result, changes may appear
 upstream as we get closer to the final 3.14.0 release. We plan on releasing version
 1.0.0 of `backports.zstd` together with release 3.14.0 of CPython.
 

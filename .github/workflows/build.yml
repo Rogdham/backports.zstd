@@ -24,7 +24,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.14.0-beta.3"
+          python-version: "3.14.0-rc.2"
       - name: Test
         run: python tests/test_integration.py
 
