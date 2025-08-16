@@ -1,6 +1,6 @@
 [project]
 name = "backports.zstd"
-version = "0.4.0"
+version = "0.5.0"
 authors = [{ name = "Rogdham", email = "contact@rogdham.net" }]
 description = "Backport of compression.zstd"
 readme = { file = "README.md", content-type = "text/markdown" }
