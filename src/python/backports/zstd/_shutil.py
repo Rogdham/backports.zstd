@@ -13,8 +13,6 @@ from shutil import (
     unregister_unpack_format,
 )
 
-from backports.zstd import tarfile, zipfile
-
 try:
     import zlib
     del zlib
@@ -96,6 +94,8 @@ def _make_tarball(base_name, base_dir, compress="gzip", verbose=0, dry_run=0,
         return tarinfo
 
     if not dry_run:
+        from backports.zstd import tarfile
+
         tar = tarfile.open(archive_name, 'w|%s' % tar_compression)
         arcname = base_dir
         if root_dir is not None:
@@ -114,6 +114,8 @@ _make_tarball.supports_root_dir = True
 def _unpack_zipfile(filename, extract_dir):
     """Unpack zip `filename` to `extract_dir`
     """
+    from backports.zstd import zipfile
+
     if not zipfile.is_zipfile(filename):
         raise ReadError("%s is not a zip file" % filename)
 
@@ -142,6 +144,8 @@ def _unpack_zipfile(filename, extract_dir):
 def _unpack_tarfile(filename, extract_dir, *, filter=None):
     """Unpack tar/tar.gz/tar.bz2/tar.xz/tar.zst `filename` to `extract_dir`
     """
+    from backports.zstd import tarfile
+
     try:
         tarobj = tarfile.open(filename)
     except tarfile.TarError:
