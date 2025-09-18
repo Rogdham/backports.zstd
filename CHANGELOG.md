@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+### :rocket: Added
+
+- Update code with CPython 3.14.0 release candidate 3 version
+
 ### :bug: Fixes
 
 - Fix import order issue by importing the `tarfile` and `zipfile` modules only when
