@@ -10,6 +10,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 ### :rocket: Added
 
 - Update code with CPython 3.14.0 release candidate 3 version
+- Update type hints with typeshed `aa5202465`
 - Allow to use `libzstd` present on the system with the `--system-zstd` build backend
   argument
 - Check the `libzstd` version during build and at runtime

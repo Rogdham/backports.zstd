@@ -6,7 +6,7 @@ from collections.abc import Callable, Iterable, Iterator, Mapping
 from gzip import _ReadableFileobj as _GzipReadableFileobj, _WritableFileobj as _GzipWritableFileobj
 from types import TracebackType
 from typing import IO, ClassVar, Final, Literal, Protocol, overload, type_check_only
-from typing_extensions import Self, TypeAlias, Deprecated
+from typing_extensions import Self, TypeAlias, deprecated
 
 from backports.zstd import ZstdDict
 
@@ -629,7 +629,7 @@ class TarFile:
         members: Iterable[TarInfo] | None = None,
         *,
         numeric_owner: bool = False,
-        filter: _TarfileFilter | None = ...,
+        filter: _TarfileFilter | None = None,
     ) -> None: ...
     # Same situation as for `extractall`.
     def extract(
@@ -639,7 +639,7 @@ class TarFile:
         set_attrs: bool = True,
         *,
         numeric_owner: bool = False,
-        filter: _TarfileFilter | None = ...,
+        filter: _TarfileFilter | None = None,
     ) -> None: ...
     def _extract_member(
         self,
@@ -717,6 +717,28 @@ def tar_filter(member: TarInfo, dest_path: str) -> TarInfo: ...
 def data_filter(member: TarInfo, dest_path: str) -> TarInfo: ...
 
 class TarInfo:
+    __slots__ = (
+        "name",
+        "mode",
+        "uid",
+        "gid",
+        "size",
+        "mtime",
+        "chksum",
+        "type",
+        "linkname",
+        "uname",
+        "gname",
+        "devmajor",
+        "devminor",
+        "offset",
+        "offset_data",
+        "pax_headers",
+        "sparse",
+        "_tarfile",
+        "_sparse_structs",
+        "_link_target",
+    )
     name: str
     path: str
     size: int
@@ -737,10 +759,10 @@ class TarInfo:
     pax_headers: Mapping[str, str]
     def __init__(self, name: str = "") -> None: ...
     @property
-    @deprecated("Deprecated in Python 3.13; removal scheduled for Python 3.16")
+    @deprecated("Deprecated since Python 3.13; will be removed in Python 3.16.")
     def tarfile(self) -> TarFile | None: ...
     @tarfile.setter
-    @deprecated("Deprecated in Python 3.13; removal scheduled for Python 3.16")
+    @deprecated("Deprecated since Python 3.13; will be removed in Python 3.16.")
     def tarfile(self, tarfile: TarFile | None) -> None: ...
 
     @classmethod
