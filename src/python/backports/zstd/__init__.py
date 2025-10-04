@@ -41,6 +41,9 @@ zstd_version_info = (*divmod(_zstd.zstd_version_number // 100, 100),
                      _zstd.zstd_version_number % 100)
 """Version number of the runtime zstd library as a tuple of integers."""
 
+if zstd_version_info < (1, 4, 5):
+    raise RuntimeError("zstd version is too old")
+
 COMPRESSION_LEVEL_DEFAULT = _zstd.ZSTD_CLEVEL_DEFAULT
 """The default compression level for Zstandard, currently '3'."""
 

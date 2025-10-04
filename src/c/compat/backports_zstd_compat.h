@@ -2,8 +2,13 @@
 #define BACKPORTS_ZSTD_COMPAT_H
 
 #include "Python.h"
+#include <zstd.h>
 
 #include "pythoncapi_compat.h"
+
+#if ZSTD_VERSION_NUMBER < 10405
+#error "zstd version is too old"
+#endif
 
 #if PY_VERSION_HEX < 0x030E0000 // Python 3.13 and below
 static inline int PyType_Freeze(PyTypeObject *type)

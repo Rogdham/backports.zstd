@@ -1,4 +1,5 @@
 import platform
+import sys
 import sysconfig
 from distutils.unixccompiler import UnixCCompiler
 from pathlib import Path
@@ -20,8 +21,15 @@ with (ROOT_PATH / "LICENSE_zstd.txt").open("w") as f:
 
 UnixCCompiler.src_extensions.append(".S")
 
+
 _PLATFORM_IS_WIN = sysconfig.get_platform().startswith("win")
 _USE_CFFI = platform.python_implementation() == "PyPy"
+try:
+    sys.argv.remove("--system-zstd")
+except ValueError:
+    _SYSTEM_ZSTD = False
+else:
+    _SYSTEM_ZSTD = True
 
 
 def locate_sources(*sub_paths):
@@ -29,61 +37,66 @@ def locate_sources(*sub_paths):
     yield from map(str, Path(*sub_paths).rglob(f"*.[{extensions}]"))
 
 
-_COMMON_EXTENSION_ARGS = dict(
-    extra_compile_args=["/Ob3", "/GF", "/Gy"] if _PLATFORM_IS_WIN else ["-g0", "-flto"],
-    extra_link_args=[] if _PLATFORM_IS_WIN else ["-g0", "-flto"],
-    define_macros=[
-        ("ZSTD_MULTITHREAD", None),  # enable multithreading support
-    ],
-)
+def build_extension():
+    kwargs = dict(
+        sources=[],
+        include_dirs=[],
+        libraries=[],
+        extra_compile_args=[],
+        extra_link_args=[],
+        define_macros=[
+            ("ZSTD_MULTITHREAD", None),  # enable multithreading support
+        ],
+    )
 
+    if _PLATFORM_IS_WIN:
+        kwargs["extra_compile_args"] += ["/Ob3", "/GF", "/Gy"]
+    else:
+        kwargs["extra_compile_args"] += ["-g0", "-flto"]
+        kwargs["extra_link_args"] += ["-g0", "-flto"]
 
-def extension_c():
-    return Extension(
-        name="backports.zstd._zstd",
-        sources=[
-            *locate_sources("src", "c", "compression_zstd"),
-            *locate_sources("src", "c", "compat"),
+    if _SYSTEM_ZSTD:
+        kwargs["libraries"].append("zstd")
+    else:
+        kwargs["sources"] += [
             *locate_sources("src", "c", "zstd", "lib", "common"),
             *locate_sources("src", "c", "zstd", "lib", "compress"),
             *locate_sources("src", "c", "zstd", "lib", "decompress"),
             *locate_sources("src", "c", "zstd", "lib", "dictBuilder"),
-        ],
-        include_dirs=[
+        ]
+        kwargs["include_dirs"] += [
+            "src/c/zstd/lib",
+            "src/c/zstd/lib/common",
+            "src/c/zstd/lib/dictBuilder",
+        ]
+
+    if _USE_CFFI:
+        import cffi
+
+        ffibuilder = cffi.FFI()
+        ffibuilder.cdef((ROOT_PATH / "src" / "c" / "cffi" / "cdef.h").read_text())
+        ffibuilder.set_source(
+            source=(ROOT_PATH / "src" / "c" / "cffi" / "source.c").read_text(),
+            module_name="backports.zstd._zstd_cffi",
+            **kwargs,
+        )
+        return ffibuilder.distutils_extension()
+
+    else:
+        kwargs["sources"] += [
+            *locate_sources("src", "c", "compression_zstd"),
+            *locate_sources("src", "c", "compat"),
+        ]
+        kwargs["include_dirs"] += [
             "src/c/compat",
             "src/c/compression_zstd",
             "src/c/compression_zstd/clinic",
             "src/c/pythoncapi-compat",
-            "src/c/zstd/lib",
-            "src/c/zstd/lib/common",
-            "src/c/zstd/lib/dictBuilder",
-        ],
-        **_COMMON_EXTENSION_ARGS,
-    )
+        ]
+        return Extension(
+            name="backports.zstd._zstd",
+            **kwargs,
+        )
 
 
-def extension_cffi():
-    import cffi
-
-    ffibuilder = cffi.FFI()
-    ffibuilder.cdef((ROOT_PATH / "src" / "c" / "cffi" / "cdef.h").read_text())
-    ffibuilder.set_source(
-        source=(ROOT_PATH / "src" / "c" / "cffi" / "source.c").read_text(),
-        module_name="backports.zstd._zstd_cffi",
-        sources=[
-            *locate_sources("src", "c", "zstd", "lib", "common"),
-            *locate_sources("src", "c", "zstd", "lib", "compress"),
-            *locate_sources("src", "c", "zstd", "lib", "decompress"),
-            *locate_sources("src", "c", "zstd", "lib", "dictBuilder"),
-        ],
-        include_dirs=[
-            "src/c/zstd/lib",
-            "src/c/zstd/lib/common",
-            "src/c/zstd/lib/dictBuilder",
-        ],
-        **_COMMON_EXTENSION_ARGS,
-    )
-    return ffibuilder.distutils_extension()
-
-
-setup(ext_modules=[extension_cffi() if _USE_CFFI else extension_c()])
+setup(ext_modules=[build_extension()])

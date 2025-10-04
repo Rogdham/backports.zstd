@@ -174,6 +174,23 @@ However, this library can be used without waiting. At this point, `backports.zst
 considered feature-complete, with support for CPython 3.9 to 3.13 (including
 free-threading support for 3.13).
 
+### Can I use the libzstd version installed on my system?
+
+The wheels distributed on PyPI include a static version of `libzstd` for ease of
+installation and reproducibility.
+
+If you want to use `libzstd` installed on your system, pass the `--system-zstd` argument
+to the build backend. For example:
+
+```sh
+python -m pip install --config-settings=--build-option=--system-zstd ...
+python -m build --wheel --config-setting=--build-option=--system-zstd ...
+```
+
+If you run the test suite, set the environment variable
+`BACKPORTSZSTD_SKIP_EXTENSION_TEST=1` to skip tests that may fail when using the system
+library.
+
 ### I found a bug
 
 If you encounter any issues, please open a
