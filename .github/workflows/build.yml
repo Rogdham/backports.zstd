@@ -115,7 +115,7 @@ jobs:
     env:
       CIBW_ARCHS: ${{ matrix.archs }}
       CIBW_BUILD: ${{ matrix.build }}
-      CIBW_ENABLE: cpython-freethreading pypy
+      CIBW_ENABLE: cpython-freethreading pypy pypy-eol
       CIBW_TEST_COMMAND: python -m unittest discover {project}/tests -v
     steps:
       - name: Setup Python
