@@ -62,7 +62,7 @@ jobs:
       matrix: ${{ steps.define.outputs.matrix }}
       full: ${{ steps.define.outputs.full }}
     env:
-      PYTHON_VERSIONS: cp39 cp310 cp311 cp312 cp313 cp313t pp310 pp311
+      PYTHON_VERSIONS: cp310 cp311 cp312 cp313 cp313t pp310 pp311
       FULL:
         ${{ ( startsWith(github.ref, 'refs/tags') || startsWith(github.head_ref,
         'release-') || github.event_name == 'workflow_dispatch' ) && '1' || '0' }}

@@ -10,6 +10,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 ### :rocket: Added
 
 - Update code with CPython 3.14.0 release candidate 3 version
+- End of support for PyPy 3.9
 
 ### :bug: Fixes
 
