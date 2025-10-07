@@ -164,16 +164,6 @@ usage of this library based on the Python version:
 - [During install](#install);
 - [When importing at runtime](#usage).
 
-### What is the status of `backports.zstd`?
-
-The code currently comes from CPython 3.14.0rc3. As a result, changes may appear
-upstream as we get closer to the final 3.14.0 release. We plan on releasing version
-1.0.0 of `backports.zstd` together with release 3.14.0 of CPython.
-
-However, this library can be used without waiting. At this point, `backports.zstd` is
-considered feature-complete, with support for CPython 3.9 to 3.13 (including
-free-threading support for 3.13).
-
 ### Can I use the libzstd version installed on my system?
 
 The wheels distributed on PyPI include a static version of `libzstd` for ease of
