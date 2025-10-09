@@ -11,7 +11,7 @@ from setuptools import Extension, setup
 ROOT_PATH = Path(__file__).parent.absolute()
 with (ROOT_PATH / "LICENSE_zstd.txt").open("w") as f:
     f.write(
-        "Depending on how it is build, this package may distribute the zstd library,\n"
+        "Depending on how it is built, this package may distribute the zstd library,\n"
         "partially or in its integrality, in source or binary form.\n\n"
         "Its license is reproduced below.\n\n"
         "---\n\n"

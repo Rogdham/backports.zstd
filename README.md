@@ -9,7 +9,7 @@ Backport of [PEP-784 “adding Zstandard to the standard library”][PEP-784]
 
 ---
 
-[📖 PEP-784][PEP-784]&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[📃 Changelog](./CHANGELOG.md)&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[🎯 Roadmap](https://github.com/Rogdham/backports.zstd/issues/2)
+[📖 PEP-784][PEP-784]&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;[📃 Changelog](./CHANGELOG.md)
 
 [PEP-784]: https://peps.python.org/pep-0784/
 
@@ -155,8 +155,8 @@ The type hints for the standard library have been contributed to
 
 ### Why can this library not be installed with Python 3.14?
 
-This is on purpose. For Python 3.14 and later, use the `compression.zstd` module from
-the standard library.
+This is [on purpose](https://github.com/Rogdham/backports.zstd/issues/50). For Python
+3.14 and later, use the `compression.zstd` module from the standard library.
 
 If you want your code to be compatible with multiple Python versions, condition the
 usage of this library based on the Python version:
