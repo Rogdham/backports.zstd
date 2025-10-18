@@ -176,6 +176,41 @@ jobs:
       - name: Test
         run: python -m unittest discover tests -v
 
+  test_debug:
+    name: Test with DEBUG | ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    needs:
+      - build_sdist
+    strategy:
+      fail-fast: false
+      matrix:
+        python:
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.13t"
+          - "pypy-3.10"
+          - "pypy-3.11"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python }}"
+      - name: Restore build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: sdist
+          path: dist
+      - name: Install package
+        run: CFLAGS='-UNDEBUG' python -m pip install dist/*.tar.gz
+      - name: Test
+        run: python -m unittest discover tests -v
+
   test_system_zstd:
     name:
       Test system zstd | ${{ matrix.pypy && 'PyPy' || 'CPython' }} ${{ matrix.system &&
@@ -272,6 +307,7 @@ jobs:
       - build_wheels
       - test_integration
       - test_specific_python_versions
+      - test_debug
       - test_system_zstd
       - test_typing
     environment: publish
