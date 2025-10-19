@@ -107,12 +107,14 @@ static inline int BACKPORTSZSTD_LOCK_isLocked(PyThread_type_lock *mp)
 #define BACKPORTSZSTD_LOCK_lock PyMutex_Lock
 #define BACKPORTSZSTD_LOCK_unlock PyMutex_Unlock
 #define BACKPORTSZSTD_LOCK_free(l)
+#if PY_VERSION_HEX < 0x030E0000 // Python 3.13 and below
 static inline int BACKPORTSZSTD_LOCK_isLocked(PyMutex *lp)
 {
-    // note: this function is only used in asserts
-    // PyMutex_IsLocked is not exposed publicly https://github.com/python/cpython/issues/134009
-    Py_FatalError("Not implemented");
+    return (_Py_atomic_load_uint8(&lp->_bits) & _Py_LOCKED) != 0;
 }
+#else // Python 3.14 and above
+#define BACKPORTSZSTD_LOCK_isLocked PyMutex_IsLocked
+#endif
 
 #endif /* !BACKPORTSZSTD_LOCK */
 
