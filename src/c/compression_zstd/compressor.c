@@ -524,11 +524,13 @@ error:
     return NULL;
 }
 
+#ifndef NDEBUG
 static inline int
 mt_continue_should_break(ZSTD_inBuffer *in, ZSTD_outBuffer *out)
 {
     return in->size == in->pos && out->size != out->pos;
 }
+#endif
 
 static PyObject *
 compress_mt_continue_lock_held(ZstdCompressor *self, Py_buffer *data)
