@@ -31,7 +31,6 @@ __all__ = (
 
 import backports.zstd._zstd as _zstd
 import enum
-from backports.zstd._shutil import register_shutil
 from backports.zstd._zstd import (ZstdCompressor, ZstdDecompressor, ZstdDict, ZstdError,
                                   get_frame_size, zstd_version)
 from backports.zstd._zstdfile import ZstdFile, open, _nbytes
@@ -247,3 +246,11 @@ class Strategy(enum.IntEnum):
 
 # Check validity of the CompressionParameter & DecompressionParameter types
 _zstd.set_parameter_types(CompressionParameter, DecompressionParameter)
+
+
+# Lazy loading
+def __getattr__(name):
+    if name == "register_shutil":
+        from backports.zstd._shutil import register_shutil
+        return register_shutil
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

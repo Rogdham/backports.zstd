@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+### :rocket: Added
+
+- Shorten import time by lazy loading the `register_shutil` function
+
 ### :bug: Fixes
 
 - Fix assertion on Python 3.13 when build with `DEBUG`
