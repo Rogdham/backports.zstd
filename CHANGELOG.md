@@ -10,6 +10,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 ### :rocket: Added
 
 - Update code with CPython 3.14.2 version
+- Build wheels for riscv64
 
 ## [1.1.0] - 2025-11-23
 
