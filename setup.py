@@ -6,6 +6,10 @@ from pathlib import Path
 
 from setuptools import Extension, setup
 
+if not ((3, 9) <= sys.version_info < (3, 14)):
+    raise RuntimeError(f"Unsupported Python version: {sys.version}")
+
+
 # create a LICENSE_zstd.txt file
 # wheels distributions needs to ship the license of the zstd library
 ROOT_PATH = Path(__file__).parent.absolute()
