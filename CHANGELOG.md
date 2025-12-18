@@ -9,6 +9,8 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ### :bug: Fixes
 
+- Fix conflict on `__init__.py` file on `backports` root module by transforming
+  `backports.zstd` into an implicit namespace package (see PEP-420)
 - Raise an exception at both build and runtime when using an unsupported Python version,
   instead of crashing with a segmentation fault at runtime (in the rare cases where
   `backports.zstd` was installed despite the `requires-python` marker)
