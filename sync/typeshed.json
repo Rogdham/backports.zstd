@@ -1,0 +1,13 @@
+{
+  "src/python/backports/zstd/tarfile.pyi": ["stdlib/tarfile.pyi"],
+  "src/python/backports/zstd/zipfile/__init__.pyi": ["stdlib/zipfile/__init__.pyi"],
+  "src/python/backports/zstd/zipfile/_path/__init__.pyi": [
+    "stdlib/zipfile/_path/__init__.pyi"
+  ],
+  "src/python/backports/zstd/zipfile/_path/glob.pyi": ["stdlib/zipfile/_path/glob.pyi"],
+  "src/python/backports/zstd/__init__.pyi": [
+    "stdlib/compression/zstd/__init__.pyi",
+    "stdlib/compression/zstd/_zstdfile.pyi",
+    "stdlib/_zstd.pyi"
+  ]
+}
