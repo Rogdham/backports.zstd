@@ -68,9 +68,14 @@ def get_frame_info(frame_buffer: ReadableBuffer) -> FrameInfo: ...
 def train_dict(samples: Iterable[ReadableBuffer], dict_size: int) -> ZstdDict: ...
 def finalize_dict(zstd_dict: ZstdDict, /, samples: Iterable[ReadableBuffer], dict_size: int, level: int) -> ZstdDict: ...
 def compress(
-    data: ReadableBuffer, level: int | None = None, options: Mapping[int, int] | None = None, zstd_dict: ZstdDict | None = None
+    data: ReadableBuffer,
+    level: int | None = None,
+    options: Mapping[int, int] | None = None,
+    zstd_dict: ZstdDict | tuple[ZstdDict, int] | None = None,
 ) -> bytes: ...
-def decompress(data: ReadableBuffer, zstd_dict: ZstdDict | None = None, options: Mapping[int, int] | None = None) -> bytes: ...
+def decompress(
+    data: ReadableBuffer, zstd_dict: ZstdDict | tuple[ZstdDict, int] | None = None, options: Mapping[int, int] | None = None
+) -> bytes: ...
 @final
 class CompressionParameter(enum.IntEnum):
     compression_level = ...
@@ -147,7 +152,7 @@ class ZstdFile(_streams_BaseStream):
         *,
         level: None = None,
         options: Mapping[int, int] | None = None,
-        zstd_dict: ZstdDict | None = None,
+        zstd_dict: ZstdDict | tuple[ZstdDict, int] | None = None,
     ) -> None: ...
     @overload
     def __init__(
@@ -158,7 +163,7 @@ class ZstdFile(_streams_BaseStream):
         *,
         level: int | None = None,
         options: Mapping[int, int] | None = None,
-        zstd_dict: ZstdDict | None = None,
+        zstd_dict: ZstdDict | tuple[ZstdDict, int] | None = None,
     ) -> None: ...
     def write(self, data: ReadableBuffer, /) -> int: ...
     def flush(self, mode: _ZstdCompressorFlushBlock | _ZstdCompressorFlushFrame = 1) -> bytes: ...  # type: ignore[override]
@@ -182,7 +187,7 @@ def open(
     *,
     level: None = None,
     options: Mapping[int, int] | None = None,
-    zstd_dict: ZstdDict | None = None,
+    zstd_dict: ZstdDict | tuple[ZstdDict, int] | None = None,
     encoding: str | None = None,
     errors: str | None = None,
     newline: str | None = None,
@@ -195,7 +200,7 @@ def open(
     *,
     level: int | None = None,
     options: Mapping[int, int] | None = None,
-    zstd_dict: ZstdDict | None = None,
+    zstd_dict: ZstdDict | tuple[ZstdDict, int] | None = None,
     encoding: str | None = None,
     errors: str | None = None,
     newline: str | None = None,
@@ -208,7 +213,7 @@ def open(
     *,
     level: None = None,
     options: Mapping[int, int] | None = None,
-    zstd_dict: ZstdDict | None = None,
+    zstd_dict: ZstdDict | tuple[ZstdDict, int] | None = None,
     encoding: str | None = None,
     errors: str | None = None,
     newline: str | None = None,
@@ -221,7 +226,7 @@ def open(
     *,
     level: int | None = None,
     options: Mapping[int, int] | None = None,
-    zstd_dict: ZstdDict | None = None,
+    zstd_dict: ZstdDict | tuple[ZstdDict, int] | None = None,
     encoding: str | None = None,
     errors: str | None = None,
     newline: str | None = None,
@@ -241,7 +246,10 @@ class ZstdCompressor:
     FLUSH_BLOCK: Final = 1
     FLUSH_FRAME: Final = 2
     def __new__(
-        cls, level: int | None = None, options: Mapping[int, int] | None = None, zstd_dict: ZstdDict | None = None
+        cls,
+        level: int | None = None,
+        options: Mapping[int, int] | None = None,
+        zstd_dict: ZstdDict | tuple[ZstdDict, int] | None = None,
     ) -> Self: ...
     def compress(
         self, /, data: ReadableBuffer, mode: _ZstdCompressorContinue | _ZstdCompressorFlushBlock | _ZstdCompressorFlushFrame = 0
@@ -253,7 +261,9 @@ class ZstdCompressor:
 
 @final
 class ZstdDecompressor:
-    def __new__(cls, zstd_dict: ZstdDict | None = None, options: Mapping[int, int] | None = None) -> Self: ...
+    def __new__(
+        cls, zstd_dict: ZstdDict | tuple[ZstdDict, int] | None = None, options: Mapping[int, int] | None = None
+    ) -> Self: ...
     def decompress(self, /, data: ReadableBuffer, max_length: int = -1) -> bytes: ...
     @property
     def eof(self) -> bool: ...

@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+### :rocket: Added
+
+- Update type hints with typeshed `bbddfee`
+
 ### :bug: Fixes
 
 - Fix conflict on `__init__.py` file on `backports` root module by transforming
