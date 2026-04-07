@@ -78,20 +78,22 @@ jobs:
           FULL = os.environ["FULL"] == "1"
           CASES = []
 
-          def add(name, platform, archs, build, qemu=False):
+          def add(name, runner, platform, archs, build, qemu=False):
               CASES.append(locals())
 
           for identifier in ("manylinux", "musllinux"):
               build = " ".join(f"{py}-{identifier}_*" for py in PYTHON_VERSIONS if identifier=="manylinux" or py.startswith("cp"))
-              add(f"Linux regular {identifier}", "ubuntu-latest", "x86_64 i686", build)
+              add(f"Linux regular {identifier}", "ubuntu-latest", "linux", "x86_64 i686", build)
               if FULL:
                   for arch in ("aarch64", "ppc64le", "riscv64", "s390x"):
-                      add(f"Linux {arch} {identifier}", "ubuntu-latest", arch, build, True)
+                      add(f"Linux {arch} {identifier}", "ubuntu-latest", "linux", arch, build, True)
           build = " ".join(f"{py}-*" for py in PYTHON_VERSIONS)
-          add("Windows regular", "windows-latest", "AMD64 x86", build)
+          add("Windows regular", "windows-latest", "windows", "AMD64 x86", build)
           if FULL:
-              add("Windows arm", "windows-11-arm", "ARM64", build)
-          add("macOS regular", "macos-latest", "x86_64 arm64", build)
+              add("Windows arm", "windows-11-arm", "windows", "ARM64", build)
+          add("macOS regular", "macos-latest", "macos", "x86_64 arm64", build)
+          add("Android regular", "ubuntu-latest", "android", "arm64_v8a x86_64", "cp313-*")
+          add("iOS regular", "macos-14", "ios", "all", "cp313-*")  # "macos-14" because of https://github.com/actions/runner-images/issues/12777
 
           print("full:", FULL)
           print(json.dumps(CASES, indent=2))
@@ -102,7 +104,7 @@ jobs:
 
   build_wheels:
     name: Build wheels | ${{ matrix.name }}
-    runs-on: ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
     needs:
       - build_sdist
       - define_build_wheels_matrix
@@ -111,10 +113,12 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.define_build_wheels_matrix.outputs.matrix) }}
     env:
+      CIBW_PLATFORM: ${{ matrix.platform }}
       CIBW_ARCHS: ${{ matrix.archs }}
       CIBW_BUILD: ${{ matrix.build }}
       CIBW_ENABLE: pypy pypy-eol
-      CIBW_TEST_COMMAND: python -m unittest discover {project}/tests -v
+      CIBW_TEST_COMMAND: python -m unittest discover tests -v
+      CIBW_TEST_SOURCES: tests
     steps:
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
