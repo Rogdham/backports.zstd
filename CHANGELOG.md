@@ -9,7 +9,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 ### :rocket: Added
 
-- Update code with CPython 3.14.3 version
+- Update code with CPython 3.14.4 version
 
 ## [1.3.0] - 2025-12-29
 
