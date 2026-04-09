@@ -10,6 +10,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 ### :rocket: Added
 
 - Update code with CPython 3.14.4 version
+- Stop build wheels for CPython 3.13 free-threading
 
 ## [1.3.0] - 2025-12-29
 

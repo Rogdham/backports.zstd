@@ -62,7 +62,7 @@ jobs:
       matrix: ${{ steps.define.outputs.matrix }}
       full: ${{ steps.define.outputs.full }}
     env:
-      PYTHON_VERSIONS: cp39 cp310 cp311 cp312 cp313 cp313t pp310 pp311
+      PYTHON_VERSIONS: cp39 cp310 cp311 cp312 cp313 pp310 pp311
       FULL:
         ${{ ( startsWith(github.ref, 'refs/tags') || startsWith(github.head_ref,
         'release-') || github.event_name == 'workflow_dispatch' ) && '1' || '0' }}
@@ -113,7 +113,7 @@ jobs:
     env:
       CIBW_ARCHS: ${{ matrix.archs }}
       CIBW_BUILD: ${{ matrix.build }}
-      CIBW_ENABLE: cpython-freethreading pypy pypy-eol
+      CIBW_ENABLE: pypy pypy-eol
       CIBW_TEST_COMMAND: python -m unittest discover {project}/tests -v
     steps:
       - name: Setup Python
