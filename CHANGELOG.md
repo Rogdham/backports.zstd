@@ -5,7 +5,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project
 adheres to [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## [1.4.0] - 2026-05-03
+
+[1.4.0]: https://github.com/rogdham/backports.zstd/releases/tag/v1.4.0
 
 ### :rocket: Added
 
@@ -14,7 +16,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 - Remove support for CPython 3.9
 - Build wheels for Android
 - Build wheels for iOS
-- Stop build wheels for CPython 3.13 free-threading
+- Stop building wheels for CPython 3.13 free-threading
 
 ## [1.3.0] - 2025-12-29
 
