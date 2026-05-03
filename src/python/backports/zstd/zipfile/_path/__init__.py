@@ -198,10 +198,7 @@ def _extract_text_encoding(encoding=None, *args, **kwargs):
     # See jaraco/zipp#143
     is_old_pypi = is_pypy and sys.pypy_version_info < (7, 3, 19)
     stack_level = 3 + is_old_pypi
-    if sys.version_info >= (3, 10):
-        return io.text_encoding(encoding, stack_level), args, kwargs
-    else:
-        return encoding or 'locale', args, kwargs
+    return io.text_encoding(encoding, stack_level), args, kwargs
 
 
 class Path:

@@ -11,6 +11,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 - Update code with CPython 3.14.4 version
 - Update type hints with typeshed `44dac88`
+- Remove support for CPython 3.9
 - Build wheels for Android
 - Build wheels for iOS
 - Stop build wheels for CPython 3.13 free-threading

@@ -1,7 +1,7 @@
 """Python bindings to the Zstandard (zstd) compression library (RFC-8878)."""
 
 import sys
-if not ((3, 9) <= sys.version_info < (3, 14)):
+if not ((3, 10) <= sys.version_info < (3, 14)):
     raise RuntimeError(f"Unsupported Python version: {sys.version}")
 
 __all__ = (

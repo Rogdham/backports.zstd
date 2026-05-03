@@ -6,7 +6,7 @@ from pathlib import Path
 
 from setuptools import Extension, setup
 
-if not ((3, 9) <= sys.version_info < (3, 14)):
+if not ((3, 10) <= sys.version_info < (3, 14)):
     raise RuntimeError(f"Unsupported Python version: {sys.version}")
 
 
