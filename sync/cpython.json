@@ -19,6 +19,7 @@
   "src/c/compression_zstd/clinic/decompressor.c.h": [
     "Modules/_zstd/clinic/decompressor.c.h"
   ],
+  "src/python/backports/zstd/_compat.py": ["Lib/posixpath.py", "Lib/ntpath.py"],
   "src/python/backports/zstd/_streams.py": ["Lib/compression/_common/_streams.py"],
   "src/python/backports/zstd/__init__.py": ["Lib/compression/zstd/__init__.py"],
   "src/python/backports/zstd/_zstdfile.py": ["Lib/compression/zstd/_zstdfile.py"],

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### :rocket: Added
+
+- Update code with CPython 3.14.5 version
+
 ## [1.4.0] - 2026-05-03
 
 [1.4.0]: https://github.com/rogdham/backports.zstd/releases/tag/v1.4.0

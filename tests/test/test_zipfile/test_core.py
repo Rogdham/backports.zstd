@@ -33,10 +33,6 @@ from test.support.os_helper import (
 from test.support.import_helper import ensure_lazy_imports
 
 
-# backportszstd: specific test conditions
-gh_96290_support = bool(ntpath.splitdrive("\\\\conky\\\\mountpoint\\foo\\bar")[0])
-
-
 TESTFN2 = TESTFN + "2"
 TESTFNDIR = TESTFN + "d"
 FIXEDTEST_SIZE = 1000
@@ -1756,22 +1752,10 @@ class ExtractTests(unittest.TestCase):
             (r'C:\foo\bar', 'foo/bar'),
             (r'//conky/mountpoint/foo/bar', 'foo/bar'),
             (r'\\conky\mountpoint\foo\bar', 'foo/bar'),
-        ]
-        if gh_96290_support:
-            windows_hacknames += [
-                (r'///conky/mountpoint/foo/bar', 'mountpoint/foo/bar'),
-                (r'\\\conky\mountpoint\foo\bar', 'mountpoint/foo/bar'),
-                (r'//conky//mountpoint/foo/bar', 'mountpoint/foo/bar'),
-                (r'\\conky\\mountpoint\foo\bar', 'mountpoint/foo/bar'),
-            ]
-        else:
-            windows_hacknames += [
-                (r'///conky/mountpoint/foo/bar', 'conky/mountpoint/foo/bar'),
-                (r'\\\conky\mountpoint\foo\bar', 'conky/mountpoint/foo/bar'),
-                (r'//conky//mountpoint/foo/bar', 'conky/mountpoint/foo/bar'),
-                (r'\\conky\\mountpoint\foo\bar', 'conky/mountpoint/foo/bar'),
-            ]
-        windows_hacknames += [
+            (r'///conky/mountpoint/foo/bar', 'mountpoint/foo/bar'),
+            (r'\\\conky\mountpoint\foo\bar', 'mountpoint/foo/bar'),
+            (r'//conky//mountpoint/foo/bar', 'mountpoint/foo/bar'),
+            (r'\\conky\\mountpoint\foo\bar', 'mountpoint/foo/bar'),
             (r'//?/C:/foo/bar', 'foo/bar'),
             (r'\\?\C:\foo\bar', 'foo/bar'),
             (r'C:/../C:/foo/bar', 'C_/foo/bar'),
@@ -1915,7 +1899,7 @@ class OtherTests(unittest.TestCase):
                 zip_info = zf.getinfo("test_no_source_date_epoch.txt")
                 current_time = time.localtime()[:6]
                 for z_time, c_time in zip(zip_info.date_time, current_time):
-                    self.assertAlmostEqual(z_time, c_time, delta=1)
+                    self.assertAlmostEqual(z_time, c_time, delta=2)
 
     def test_close(self):
         """Check that the zipfile is closed after the 'with' block."""
