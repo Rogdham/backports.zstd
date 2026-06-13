@@ -1,3 +1,5 @@
+"""Implementation module for Zstandard compression."""
+
 # if present, the C extension takes precedence over this file during import
 
 from backports.zstd._cffi import (

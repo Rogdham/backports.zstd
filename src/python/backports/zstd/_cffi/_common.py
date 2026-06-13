@@ -121,14 +121,12 @@ _PARAMETER_TYPES = {}
 
 
 def set_parameter_types(c_parameter_type, d_parameter_type):
-    """
-    Set CompressionParameter and DecompressionParameter types for validity check.
+    """Set CompressionParameter and DecompressionParameter types for validity check.
 
-    c_parameter_type
-      CompressionParameter IntEnum type object
-    d_parameter_type
-      DecompressionParameter IntEnum type object
-    """
+  c_parameter_type
+    CompressionParameter IntEnum type object
+  d_parameter_type
+    DecompressionParameter IntEnum type object"""
     _PARAMETER_TYPES["compression"] = c_parameter_type
     _PARAMETER_TYPES["decompression"] = d_parameter_type
 

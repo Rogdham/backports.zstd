@@ -24,17 +24,15 @@ from backports.zstd._cffi.zstddict import _Py_parse_zstd_dict
 
 
 class ZstdDecompressor:
-    """
-    Create a decompressor object for decompressing data incrementally.
+    """Create a decompressor object for decompressing data incrementally.
 
-      zstd_dict
-        A ZstdDict object, a pre-trained Zstandard dictionary.
-      options
-        A dict object that contains advanced decompression parameters.
+  zstd_dict
+    A ZstdDict object, a pre-trained Zstandard dictionary.
+  options
+    A dict object that contains advanced decompression parameters.
 
-    Thread-safe at method level. For one-shot decompression, use the decompress()
-    function instead.
-    """
+Thread-safe at method level.  For one-shot decompression, use the
+decompress() function instead."""
 
     def __init__(self, zstd_dict=None, options=None):
         self._input_buffer = _ffi.NULL
@@ -101,7 +99,7 @@ class ZstdDecompressor:
             # Check key type
             if isinstance(key, _PARAMETER_TYPES["compression"]):
                 raise TypeError(
-                    "compression options dictionary key must not be a "
+                    "decompression options dictionary key must not be a "
                     "CompressionParameter attribute"
                 )
 
@@ -125,12 +123,11 @@ class ZstdDecompressor:
 
     @property
     def unused_data(self):
-        """
-        A bytes object of un-consumed input data.
+        """A bytes object of un-consumed input data.
 
-        When ZstdDecompressor object stops after a frame is
-        decompressed, unused input data after the frame. Otherwise this will be b''.
-        """
+When ZstdDecompressor object stops after a frame is
+decompressed, unused input data after the frame.  Otherwise this
+will be b''."""
         with self._lock:
             if not self._eof:
                 return b""
@@ -145,46 +142,41 @@ class ZstdDecompressor:
 
     @property
     def eof(self):
-        """
-        True means the end of the first frame has been reached. If decompress data
-        after that, an EOFError exception will be raised.
-        """
+        """True means the end of the first frame has been reached. If decompress data
+after that, an EOFError exception will be raised."""
         return self._eof
 
     @property
     def needs_input(self):
-        """
-        If the max_length output limit in .decompress() method has been reached,
-        and the decompressor has (or may has) unconsumed input data, it will be set
-        to False. In this case, passing b'' to the .decompress() method may output
-        further data.
-        """
+        """If the max_length output limit in .decompress() method has been reached,
+and the decompressor has (or may has) unconsumed input data, it will be set
+to False. In this case, passing b'' to the .decompress() method may output
+further data."""
         return self._needs_input
 
     def decompress(self, data, max_length=-1):
-        """
-        Decompress *data*, returning uncompressed bytes if possible, or b'' otherwise.
+        """Decompress *data*, returning uncompressed bytes if possible, or b'' otherwise.
 
-          data
-            A bytes-like object, Zstandard data to be decompressed.
-          max_length
-            Maximum size of returned data. When it is negative, the size of
-            output buffer is unlimited. When it is nonnegative, returns at
-            most max_length bytes of decompressed data.
+  data
+    A bytes-like object, Zstandard data to be decompressed.
+  max_length
+    Maximum size of returned data. When it is negative, the size of
+    output buffer is unlimited. When it is nonnegative, returns at
+    most max_length bytes of decompressed data.
 
-        If *max_length* is nonnegative, returns at most *max_length* bytes of
-        decompressed data. If this limit is reached and further output can be
-        produced, *self.needs_input* will be set to ``False``. In this case, the next
-        call to *decompress()* may provide *data* as b'' to obtain more of the output.
+If *max_length* is nonnegative, returns at most *max_length* bytes
+of decompressed data.  If this limit is reached and further output
+can be produced, *self.needs_input* will be set to ``False``.  In
+this case, the next call to *decompress()* may provide *data* as b''
+to obtain more of the output.
 
-        If all of the input data was decompressed and returned (either because this
-        was less than *max_length* bytes, or because *max_length* was negative),
-        *self.needs_input* will be set to True.
+If all of the input data was decompressed and returned (either
+because this was less than *max_length* bytes, or because
+*max_length* was negative), *self.needs_input* will be set to True.
 
-        Attempting to decompress data after the end of a frame is reached raises an
-        EOFError. Any data found after the end of the frame is ignored and saved in
-        the self.unused_data attribute.
-        """
+Attempting to decompress data after the end of a frame is reached
+raises an EOFError.  Any data found after the end of the frame is
+ignored and saved in the self.unused_data attribute."""
         with self._lock:
             return self._stream_decompress_lock_held(data, max_length)
 

@@ -11,19 +11,17 @@ from backports.zstd._cffi._common import (
 
 
 class ZstdDict:
-    """
-    Represents a Zstandard dictionary.
+    """Represents a Zstandard dictionary.
 
-      dict_content
-        The content of a Zstandard dictionary as a bytes-like object.
-      is_raw
-        If true, perform no checks on *dict_content*, useful for some
-        advanced cases. Otherwise, check that the content represents
-        a Zstandard dictionary created by the zstd library or CLI.
+  dict_content
+    The content of a Zstandard dictionary as a bytes-like object.
+  is_raw
+    If true, perform no checks on *dict_content*, useful for some
+    advanced cases. Otherwise, check that the content represents
+    a Zstandard dictionary created by the zstd library or CLI.
 
-    The dictionary can be used for compression or decompression, and can be shared
-    by multiple ZstdCompressor or ZstdDecompressor objects.
-    """
+The dictionary can be used for compression or decompression, and can be
+shared by multiple ZstdCompressor or ZstdDecompressor objects."""
 
     def __init__(self, dict_content, *, is_raw=False):
         # All dictionaries must be at least 8 bytes
@@ -67,62 +65,56 @@ class ZstdDict:
 
     @property
     def dict_id(self):
-        """
-        The Zstandard dictionary, an int between 0 and 2**32.
+        """The Zstandard dictionary, an int between 0 and 2**32.
 
-        A non-zero value represents an ordinary Zstandard dictionary,
-        conforming to the standardised format.
+A non-zero value represents an ordinary Zstandard dictionary,
+conforming to the standardised format.
 
-        A value of zero indicates a 'raw content' dictionary,
-        without any restrictions on format or content.
-        """
+A value of zero indicates a 'raw content' dictionary,
+without any restrictions on format or content."""
         return self._dict_id
 
     @property
     def as_digested_dict(self):
-        """
-        Load as a digested dictionary to compressor.
+        """Load as a digested dictionary to compressor.
 
-        Pass this attribute as zstd_dict argument:
-        compress(dat, zstd_dict=zd.as_digested_dict)
+Pass this attribute as zstd_dict argument:
+compress(dat, zstd_dict=zd.as_digested_dict)
 
-        1. Some advanced compression parameters of compressor may be overridden
-           by parameters of digested dictionary.
-        2. ZstdDict has a digested dictionaries cache for each compression level.
-           It's faster when loading again a digested dictionary with the same
-           compression level.
-        3. No need to use this for decompression.
-        """
+1. Some advanced compression parameters of compressor may be
+   overridden by parameters of digested dictionary.
+2. ZstdDict has a digested dictionaries cache for each compression
+   level.  It's faster when loading again a digested dictionary with
+   the same compression level.
+3. No need to use this for decompression."""
         return self, _DictionaryType.DICT_TYPE_DIGESTED
 
     @property
     def as_undigested_dict(self):
-        """
-        Load as an undigested dictionary to compressor.
+        """Load as an undigested dictionary to compressor.
 
-        Pass this attribute as zstd_dict argument:
-        compress(dat, zstd_dict=zd.as_undigested_dict)
+Pass this attribute as zstd_dict argument:
+compress(dat, zstd_dict=zd.as_undigested_dict)
 
-        1. The advanced compression parameters of compressor will not be overridden.
-        2. Loading an undigested dictionary is costly. If load an undigested dictionary
-           multiple times, consider reusing a compressor object.
-        3. No need to use this for decompression.
-        """
+1. The advanced compression parameters of compressor will not be
+   overridden.
+2. Loading an undigested dictionary is costly. If load an undigested
+   dictionary multiple times, consider reusing a compressor object.
+3. No need to use this for decompression."""
         return self, _DictionaryType.DICT_TYPE_UNDIGESTED
 
     @property
     def as_prefix(self):
-        """
-        Load as a prefix to compressor/decompressor.
+        """Load as a prefix to compressor/decompressor.
 
-        Pass this attribute as zstd_dict argument:
-        compress(dat, zstd_dict=zd.as_prefix)
+Pass this attribute as zstd_dict argument:
+compress(dat, zstd_dict=zd.as_prefix)
 
-        1. Prefix is compatible with long distance matching, while dictionary is not.
-        2. It only works for the first frame, then the compressor/decompressor will
-           return to no prefix state.
-        3. When decompressing, must use the same prefix as when compressing.
-        """
+1. Prefix is compatible with long distance matching, while
+   dictionary is not.
+2. It only works for the first frame, then the
+   compressor/decompressor will return to no prefix state.
+3. When decompressing, must use the same prefix as when compressing."""
         return self, _DictionaryType.DICT_TYPE_PREFIX
 
     def _get_cdict(self, compression_level):

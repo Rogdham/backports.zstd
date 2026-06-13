@@ -53,14 +53,12 @@ ZSTD_btultra2 = _lib.ZSTD_btultra2
 
 
 def get_param_bounds(parameter, is_compress):
-    """
-    Get CompressionParameter/DecompressionParameter bounds.
+    """Get CompressionParameter/DecompressionParameter bounds.
 
-    parameter
-      The parameter to get bounds.
-    is_compress
-      True for CompressionParameter, False for DecompressionParameter.
-    """
+  parameter
+    The parameter to get bounds.
+  is_compress
+    True for CompressionParameter, False for DecompressionParameter."""
     if is_compress:
         bound = _lib.ZSTD_cParam_getBounds(parameter)
         if _lib.ZSTD_isError(bound.error):
@@ -73,12 +71,10 @@ def get_param_bounds(parameter, is_compress):
 
 
 def get_frame_info(frame_buffer):
-    """
-    Get Zstandard frame infomation from a frame header.
+    """Get Zstandard frame infomation from a frame header.
 
-    frame_buffer
-      A bytes-like object, containing the header of a Zstandard frame.
-    """
+  frame_buffer
+    A bytes-like object, containing the header of a Zstandard frame."""
     decompressed_size = _lib.ZSTD_getFrameContentSize(
         _ffi.from_buffer(frame_buffer), len(frame_buffer)
     )
@@ -98,13 +94,11 @@ def get_frame_info(frame_buffer):
 
 
 def get_frame_size(frame_buffer):
-    """
-    Get the size of a Zstandard frame, including the header and optional checksum.
+    """Get the size of a Zstandard frame, including the header and optional checksum.
 
-    frame_buffer
-      A bytes-like object, it should start from the beginning of a frame,
-      and contains at least one complete frame.
-    """
+  frame_buffer
+    A bytes-like object, it should start from the beginning of a frame,
+    and contains at least one complete frame."""
     frame_size = _lib.ZSTD_findFrameCompressedSize(
         _ffi.from_buffer(frame_buffer), len(frame_buffer)
     )
@@ -144,16 +138,14 @@ def _clinic_train_dict(*args):
 
 
 def train_dict(samples_bytes, samples_sizes, dict_size):
-    """
-    Train a Zstandard dictionary on sample data.
+    """Train a Zstandard dictionary on sample data.
 
-    samples_bytes
-      Concatenation of samples.
-    samples_sizes
-      Tuple of samples' sizes.
-    dict_size
-      The size of the dictionary.
-    """
+  samples_bytes
+    Concatenation of samples.
+  samples_sizes
+    Tuple of samples' sizes.
+  dict_size
+    The size of the dictionary."""
     _clinic_train_dict(samples_bytes, samples_sizes, dict_size)
 
     # Check arguments
@@ -193,20 +185,18 @@ def _clinic_finalize_dict(*args):
 def finalize_dict(
     custom_dict_bytes, samples_bytes, samples_sizes, dict_size, compression_level
 ):
-    """
-    Finalize a Zstandard dictionary.
+    """Finalize a Zstandard dictionary.
 
-    custom_dict_bytes
-      Custom dictionary content.
-    samples_bytes
-      Concatenation of samples.
-    samples_sizes
-      Tuple of samples' sizes.
-    dict_size
-      The size of the dictionary.
-    compression_level
-      Optimize for a specific Zstandard compression level, 0 means default.
-    """
+  custom_dict_bytes
+    Custom dictionary content.
+  samples_bytes
+    Concatenation of samples.
+  samples_sizes
+    Tuple of samples' sizes.
+  dict_size
+    The size of the dictionary.
+  compression_level
+    Optimize for a specific Zstandard compression level, 0 means default."""
     _clinic_finalize_dict(
         custom_dict_bytes, samples_bytes, samples_sizes, dict_size, compression_level
     )

@@ -31,26 +31,24 @@ def _zstd_contentsize_converter(size):
     if size < 0 or size >= _lib.ZSTD_CONTENTSIZE_ERROR:
         raise ValueError(
             "size argument should be a positive int less "
-            "than %ull" % _lib.ZSTD_CONTENTSIZE_ERROR
+            "than %u" % _lib.ZSTD_CONTENTSIZE_ERROR
         )
 
     return size
 
 
 class ZstdCompressor:
-    """
-    Create a compressor object for compressing data incrementally.
+    """Create a compressor object for compressing data incrementally.
 
-      level
-        The compression level to use. Defaults to COMPRESSION_LEVEL_DEFAULT.
-      options
-        A dict object that contains advanced compression parameters.
-      zstd_dict
-        A ZstdDict object, a pre-trained Zstandard dictionary.
+  level
+    The compression level to use. Defaults to COMPRESSION_LEVEL_DEFAULT.
+  options
+    A dict object that contains advanced compression parameters.
+  zstd_dict
+    A ZstdDict object, a pre-trained Zstandard dictionary.
 
-    Thread-safe at method level. For one-shot compression, use the compress()
-    function instead.
-    """
+Thread-safe at method level.  For one-shot compression, use the
+compress() function instead."""
 
     CONTINUE = _lib.ZSTD_e_continue
     FLUSH_BLOCK = _lib.ZSTD_e_flush
@@ -95,13 +93,11 @@ class ZstdCompressor:
 
     @property
     def last_mode(self):
-        """
-        The last mode used to this compressor object, its value can be .CONTINUE,
-        .FLUSH_BLOCK, .FLUSH_FRAME. Initialized to .FLUSH_FRAME.
+        """The last mode used to this compressor object, its value can be .CONTINUE,
+.FLUSH_BLOCK, .FLUSH_FRAME. Initialized to .FLUSH_FRAME.
 
-        It can be used to get the current state of a compressor, such as, data
-        flushed, or a frame ended.
-        """
+It can be used to get the current state of a compressor, such as, data
+flushed, or a frame ended."""
         return self._last_mode
 
     def _zstd_set_c_level(self, level):
@@ -203,17 +199,15 @@ class ZstdCompressor:
             self._cctx = _ffi.NULL
 
     def compress(self, data, mode=_lib.ZSTD_e_continue):
-        """
-        Provide data to the compressor object.
+        """Provide data to the compressor object.
 
-          mode
-            Can be these 3 values ZstdCompressor.CONTINUE,
-            ZstdCompressor.FLUSH_BLOCK, ZstdCompressor.FLUSH_FRAME
+  mode
+    Can be these 3 values ZstdCompressor.CONTINUE,
+    ZstdCompressor.FLUSH_BLOCK, ZstdCompressor.FLUSH_FRAME
 
-        Return a chunk of compressed data if possible, or b'' otherwise. When you have
-        finished providing data to the compressor, call the flush() method to finish
-        the compression process.
-        """
+Return a chunk of compressed data if possible, or b'' otherwise.
+When you have finished providing data to the compressor, call the
+flush() method to finish the compression process."""
         if (
             mode != _lib.ZSTD_e_continue
             and mode != _lib.ZSTD_e_flush
@@ -327,17 +321,15 @@ class ZstdCompressor:
         return _OutputBuffer_Finish(buffer, out)
 
     def flush(self, mode=_lib.ZSTD_e_end):
-        """
-        Finish the compression process.
+        """Finish the compression process.
 
-          mode
-            Can be these 2 values ZstdCompressor.FLUSH_FRAME,
-            ZstdCompressor.FLUSH_BLOCK
+  mode
+    Can be these 2 values ZstdCompressor.FLUSH_FRAME,
+    ZstdCompressor.FLUSH_BLOCK
 
-        Flush any remaining data left in internal buffers. Since Zstandard data
-        consists of one or more independent frames, the compressor object can still
-        be used after this method is called.
-        """
+Flush any remaining data left in internal buffers.  Since Zstandard
+data consists of one or more independent frames, the compressor
+object can still be used after this method is called."""
         # Check mode value
         if mode != _lib.ZSTD_e_end and mode != _lib.ZSTD_e_flush:
             raise ValueError(
@@ -359,20 +351,19 @@ class ZstdCompressor:
                 raise
 
     def set_pledged_input_size(self, size, /):
-        """
-        Set the uncompressed content size to be written into the frame header.
+        """Set the uncompressed content size to be written into the frame header.
 
-          size
-            The size of the uncompressed data to be provided to the compressor.
+  size
+    The size of the uncompressed data to be provided to the compressor.
 
-        This method can be used to ensure the header of the frame about to be written
-        includes the size of the data, unless the CompressionParameter.content_size_flag
-        is set to False. If last_mode != FLUSH_FRAME, then a RuntimeError is raised.
+This method can be used to ensure the header of the frame about to
+be written includes the size of the data, unless the
+CompressionParameter.content_size_flag is set to False.
+If last_mode != FLUSH_FRAME, then a RuntimeError is raised.
 
-        It is important to ensure that the pledged data size matches the actual data
-        size. If they do not match the compressed output data may be corrupted and the
-        final chunk written may be lost.
-        """
+It is important to ensure that the pledged data size matches the
+actual data size.  If they do not match the compressed output data
+may be corrupted and the final chunk written may be lost."""
         size = _zstd_contentsize_converter(size)
 
         # Thread-safe code
