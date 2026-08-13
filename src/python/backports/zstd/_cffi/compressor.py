@@ -55,7 +55,7 @@ compress() function instead."""
     FLUSH_FRAME = _lib.ZSTD_e_end
 
     def __init__(self, level=None, options=None, zstd_dict=None):
-        self._compression_level = 0
+        self._compression_level = _lib.ZSTD_defaultCLevel()
         self._use_multithread = False
         self._lock = Lock()
 

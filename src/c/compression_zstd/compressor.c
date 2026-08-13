@@ -349,6 +349,7 @@ _zstd_ZstdCompressor_new_impl(PyTypeObject *type, PyObject *level,
     }
 
     self->use_multithread = 0;
+    self->compression_level = ZSTD_CLEVEL_DEFAULT;
     self->dict = NULL;
     self->lock = BACKPORTSZSTD_LOCK_allocate();
     if(BACKPORTSZSTD_LOCK_isError(self->lock)) {
