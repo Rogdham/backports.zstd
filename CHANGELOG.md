@@ -10,6 +10,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 ### :rocket: Added
 
 - Update code with CPython 3.14.7 version
+- Update type hints with typeshed `6fba3ae73`
 
 ## [1.6.0] - 2026-06-14
 

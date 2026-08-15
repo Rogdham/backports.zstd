@@ -4,8 +4,8 @@ from collections.abc import Callable, Iterable, Iterator
 from io import TextIOWrapper
 from os import PathLike
 from types import TracebackType
-from typing import IO, Final, Literal, Protocol, overload, type_check_only
-from typing_extensions import Self, TypeAlias
+from typing import IO, Final, Literal, Protocol, TypeAlias, overload, type_check_only
+from typing_extensions import Self
 
 __all__ = [
     "BadZipFile",
@@ -64,6 +64,7 @@ class ZipExtFile(io.BufferedIOBase):
     newlines: list[bytes] | None
     mode: _ReadWriteMode
     name: str
+
     @overload
     def __init__(
         self, fileobj: _ClosableZipStream, mode: _ReadWriteMode, zipinfo: ZipInfo, pwd: bytes | None, close_fileobj: Literal[True]
@@ -87,6 +88,7 @@ class ZipExtFile(io.BufferedIOBase):
         pwd: bytes | None = None,
         close_fileobj: Literal[False] = False,
     ) -> None: ...
+
     def read(self, n: int | None = -1) -> bytes: ...
     def readline(self, limit: int = -1) -> bytes: ...  # type: ignore[override]
     def peek(self, n: int = 1) -> bytes: ...

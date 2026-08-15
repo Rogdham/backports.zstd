@@ -28,7 +28,7 @@ kind="$1"
 env_var_clone_path="${kind^^}_CLONE_PATH"
 CLONE_PATH="${!env_var_clone_path}"
 
-# fetch CPython tags
+# fetch tags
 src_rev="$2"
 dst_rev="$3"
 git -C "$CLONE_PATH" fetch
