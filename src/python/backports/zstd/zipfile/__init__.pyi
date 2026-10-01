@@ -1,5 +1,5 @@
 import io
-from _typeshed import SizedBuffer, StrOrBytesPath, StrPath
+from _typeshed import FileDescriptorOrPath, SizedBuffer, StrPath
 from collections.abc import Callable, Iterable, Iterator
 from io import TextIOWrapper
 from os import PathLike
@@ -275,7 +275,7 @@ class ZipInfo:
 
 from zipfile._path import CompleteDirs as CompleteDirs, Path as Path
 
-def is_zipfile(filename: StrOrBytesPath | _SupportsReadSeekTell) -> bool: ...
+def is_zipfile(filename: FileDescriptorOrPath | _SupportsReadSeekTell) -> bool: ...
 
 ZIP64_LIMIT: Final[int]
 ZIP_FILECOUNT_LIMIT: Final[int]
