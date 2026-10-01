@@ -433,7 +433,15 @@ if sys.platform.startswith("win"):
                           file=sys.__stderr__)
                     mode = 0
                 if stat.S_ISDIR(mode):
-                    _waitfor(_rmtree_inner, fullname, waitall=True)
+                    if sys.version_info >= (3, 12):
+                        # Do not follow junctions, which os.lstat() reports
+                        # as directories.
+                        if not os.path.isjunction(fullname):
+                            _waitfor(_rmtree_inner, fullname, waitall=True)
+                    else:
+                        # isjuction does not exist before Python 3.12
+                        # fallback to code of version 3.14.7
+                        _waitfor(_rmtree_inner, fullname, waitall=True)
                     _force_run(fullname, os.rmdir, fullname)
                 else:
                     _force_run(fullname, os.unlink, fullname)
