@@ -11,6 +11,7 @@ adheres to [Semantic Versioning](https://semver.org/).
 
 - Update code with CPython 3.14.8 version
 - Update type hints with typeshed `b932d8ce0`
+- Support for PyPy: Python 3.12
 
 ## [1.7.0] - 2026-08-15
 
