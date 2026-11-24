@@ -87,7 +87,7 @@ jobs:
 
           for identifier in ("manylinux", "musllinux"):
               build = " ".join(f"{py}-{identifier}_*" for py in PYTHON_VERSIONS if identifier=="manylinux" or py.startswith("cp"))
-              add(f"Linux regular {identifier}", "ubuntu-latest", "linux", "x86_64 i686", build)
+              add(f"Linux regular {identifier}", "ubuntu-24.04", "linux", "x86_64 i686", build)  # not latest due to https://github.com/pypa/cibuildwheel/issues/2950
               if FULL:
                   for arch in ("aarch64", "ppc64le", "riscv64", "s390x"):
                       add(f"Linux {arch} {identifier}", "ubuntu-latest", "linux", arch, build, True)
