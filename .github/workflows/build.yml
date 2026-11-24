@@ -97,7 +97,7 @@ jobs:
               add("Windows arm", "windows-11-arm", "windows", "ARM64", build)
           add("macOS regular", "macos-latest", "macos", "x86_64 arm64", build)
           add("Android regular", "ubuntu-latest", "android", "arm64_v8a x86_64", "cp313-*")
-          add("iOS regular", "macos-14", "ios", "all", "cp313-*")  # "macos-14" because of https://github.com/actions/runner-images/issues/12777
+          add("iOS regular", "macos-latest", "ios", "all", "cp313-*")
 
           print("full:", FULL)
           print(json.dumps(CASES, indent=2))
