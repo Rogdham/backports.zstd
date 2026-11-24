@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project
 adheres to [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+- Update the distributed version (depending on build options) of zstd to 1.6.0
+
 ## [1.8.0] - 2026-10-10
 
 [1.8.0]: https://github.com/rogdham/backports.zstd/releases/tag/v1.8.0
