@@ -26,7 +26,7 @@ from test.support import script_helper, os_helper
 from test.support import (
     findfile, requires_zlib, requires_bz2, requires_lzma,
     requires_zstd, captured_stdout, captured_stderr, requires_subprocess,
-    cpython_only
+    cpython_only, gc_collect
 )
 from test.support.os_helper import (
     TESTFN, unlink, rmtree, temp_dir, temp_cwd, fd_count, FakePath
@@ -704,6 +704,11 @@ class Bzip2TestsWithSourceFile(AbstractTestsWithSourceFile,
 class LzmaTestsWithSourceFile(AbstractTestsWithSourceFile,
                               unittest.TestCase):
     compression = zipfile.ZIP_LZMA
+
+    def setUp(self):
+        super().setUp()
+        if sys.implementation.name == "pypy":
+            self.addCleanup(gc_collect)
 
 @requires_zstd()
 class ZstdTestsWithSourceFile(AbstractTestsWithSourceFile,
